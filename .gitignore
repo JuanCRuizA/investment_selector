@@ -1,0 +1,89 @@
+# === Datos sensibles y bases de datos ===
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+*.xlsx
+*.xls
+
+# === Credenciales y secretos ===
+.env
+*.env
+config/secrets.yaml
+config/secrets.yml
+**/api_keys*
+**/credentials*
+*.pem
+*.key
+*.secret
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# === Jupyter Notebooks ===
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# === Entornos virtuales ===
+venv/
+env/
+ENV/
+.venv/
+.conda/
+conda-env/
+
+# === IDE y editores ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# === Sistema operativo ===
+.DS_Store
+Thumbs.db
+desktop.ini
+*.bak
+
+# === Logs y cache ===
+*.log
+.cache/
+*.tmp
+*.temp
+
+# === Outputs grandes y modelos ===
+*.pkl
+*.pickle
+*.parquet
+*.h5
+*.hdf5
+models/*.joblib
+models/*.pt
+models/*.pth
+
+# === Archivos de reporte generados (mantener solo en local) ===
+# Descomenta si no quieres subir reportes
+# reports/figures/*.png
+# reports/*.csv

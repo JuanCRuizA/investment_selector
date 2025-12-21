@@ -1,0 +1,32 @@
+# ================================================
+# Risk Management 2025 - Dependencies
+# ================================================
+
+# === Core Data Science ===
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# === Database ===
+sqlalchemy>=2.0.0
+
+# === Visualization ===
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.14.0
+
+# === Machine Learning / Clustering ===
+scikit-learn>=1.3.0
+hdbscan>=0.8.29
+
+# === Financial Analysis ===
+empyrical>=0.5.5
+
+# === Utilities ===
+tqdm>=4.65.0
+pyyaml>=6.0
+
+# === Jupyter ===
+jupyter>=1.0.0
+ipykernel>=6.22.0
+nbformat>=5.9.0
