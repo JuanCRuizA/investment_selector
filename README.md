@@ -111,8 +111,7 @@ Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detal
 
 ## 👤 Autor
 
-[Tu Nombre]
-
+Juan Carlos Ruiz Arteaga, carlosarte11@gmail.com
 ---
 
 *Proyecto desarrollado con fines educativos y de investigación. No constituye asesoría financiera.*
