@@ -1,0 +1,24 @@
+# Streamlit Web Application - Portfolio Construction via Clustering
+# Author: Juan Carlos Ruiz Arteaga
+# Version: 1.0
+
+# Core
+streamlit>=1.28.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualization
+plotly>=5.18.0
+plotly-express>=0.4.1
+
+# Export
+openpyxl>=3.1.0
+xlsxwriter>=3.1.0
+reportlab>=4.0.0
+fpdf2>=2.7.0
+
+# Data processing
+scipy>=1.11.0
+
+# Optional: Performance
+pyarrow>=14.0.0
