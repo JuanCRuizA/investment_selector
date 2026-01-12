@@ -14,6 +14,7 @@ Sistema de selección y construcción de portafolios de inversión basado en clu
 - [Metodología](#-metodología)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [Instalación](#-instalación)
+- [Pipeline de Producción](#-pipeline-de-producción)
 - [Resultados](#-resultados)
 - [Notebooks](#-notebooks)
 - [Roadmap](#-roadmap)
@@ -135,6 +136,8 @@ riskmanagement2025/
 │   ├── prices_matrix.csv             # Matriz de precios procesada
 │   ├── returns_matrix.csv            # Matriz de retornos diarios
 │   ├── clustering_results.csv        # Resultados del clustering
+│   ├── portafolio_*.csv              # Portafolios por perfil
+│   ├── backtest_*.csv                # Resultados de backtest
 │   └── figures/                      # Gráficos generados
 │
 ├── 🔧 src/
@@ -143,9 +146,30 @@ riskmanagement2025/
 │   ├── features.py                   # Cálculo de features
 │   ├── clustering.py                 # Algoritmos de clustering
 │   ├── portfolio.py                  # Construcción de portafolios
-│   └── backtesting.py                # Motor de backtesting
+│   ├── backtesting.py                # Motor de backtesting
+│   └── utils.py                      # Utilidades comunes
 │
-├── ⚙️ config/                         # Archivos de configuración
+├── 🔄 pipeline/                       # Pipeline de producción
+│   ├── __init__.py
+│   ├── run_pipeline.py               # Orquestador CLI principal
+│   ├── 01_data_ingestion.py          # Paso 1: Carga de datos
+│   ├── 02_feature_engineering.py     # Paso 2: Cálculo de features
+│   ├── 03_clustering.py              # Paso 3: Segmentación
+│   ├── 04_portfolio_selection.py     # Paso 4: Portafolios + backtest
+│   └── 05_generate_reports.py        # Paso 5: Outputs para web
+│
+├── 📤 outputs/
+│   └── api/                          # Archivos para aplicación web
+│       ├── portfolios.csv
+│       ├── segments.csv
+│       ├── backtest_summary.csv
+│       ├── equity_curves.csv
+│       └── metadata.json
+│
+├── ⚙️ config/
+│   ├── settings.yaml                 # Configuración del pipeline
+│   └── profiles.yaml                 # Definición de perfiles
+│
 ├── requirements.txt                  # Dependencias del proyecto
 ├── LICENSE                           # Licencia MIT
 └── README.md                         # Este archivo
@@ -191,7 +215,84 @@ jupyter>=1.0.0
 
 ---
 
-## 📊 Resultados
+## � Pipeline de Producción
+
+El proyecto incluye un pipeline automatizado para entornos de producción, diseñado para alimentar una aplicación web.
+
+### Arquitectura del Pipeline
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        PIPELINE DE PRODUCCIÓN                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌────────────┐│
+│  │  01_DATA     │───▶│  02_FEATURES │───▶│  03_CLUSTER  │───▶│04_PORTFOLIO││
+│  │  INGESTION   │    │  ENGINEERING │    │              │    │ SELECTION  ││
+│  └──────────────┘    └──────────────┘    └──────────────┘    └────────────┘│
+│         │                                                           │       │
+│         │                                                           ▼       │
+│         │                                                    ┌────────────┐│
+│         │                                                    │05_REPORTS  ││
+│         │                                                    │ (API CSV)  ││
+│         │                                                    └────────────┘│
+│         │                                                           │       │
+│         ▼                                                           ▼       │
+│   data/*.csv                                              outputs/api/*.csv │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Uso del Pipeline
+
+```bash
+# Ejecutar pipeline completo
+python -m pipeline.run_pipeline --all
+
+# Ejecutar etapas específicas
+python -m pipeline.run_pipeline --stages 1,2,3    # Solo data + features + clustering
+python -m pipeline.run_pipeline --stages 4,5      # Solo portafolios + reportes
+
+# Reentrenamiento (etapas 2-5, asume datos existentes)
+python -m pipeline.run_pipeline --retrain
+
+# Ver estado del pipeline
+python -m pipeline.run_pipeline --status
+```
+
+### Archivos de Salida para Web App
+
+| Archivo | Contenido |
+|---------|-----------|
+| `outputs/api/portfolios.csv` | Composición de todos los portafolios |
+| `outputs/api/segments.csv` | Información de segmentos de activos |
+| `outputs/api/backtest_summary.csv` | Métricas consolidadas de backtest |
+| `outputs/api/equity_curves.csv` | Series temporales de equity |
+| `outputs/api/metadata.json` | Metadatos del pipeline |
+
+### Configuración
+
+Los parámetros del pipeline se configuran en `config/settings.yaml`:
+
+```yaml
+# Parámetros financieros
+financial_params:
+  risk_free_rate: 0.05
+  trading_days: 252
+
+# Clustering
+clustering:
+  n_clusters: 4
+  outlier_detection: true
+
+# Reentrenamiento
+retraining:
+  frequency_months: 6
+```
+
+---
+
+## �📊 Resultados
 
 ### Backtesting 2024 (Out-of-Sample)
 
@@ -240,12 +341,14 @@ Resultados del backtesting con capital inicial de **$10,000 USD**:
 - [x] Backtesting out-of-sample
 - [x] Dashboard de resultados
 
-### Fase 2: Producción 🔄
+### Fase 2: Producción ✅
+- [x] Pipeline modular reproducible (`pipeline/`)
+- [x] Configuración YAML centralizada (`config/`)
+- [x] CLI para ejecución de etapas
+- [x] Outputs CSV para aplicación web (`outputs/api/`)
+- [x] Soporte para reentrenamiento cada 6 meses
 - [ ] API REST para consulta de portafolios
-- [ ] Base de datos para persistencia
 - [ ] Sistema de rebalanceo automático
-- [ ] Alertas y notificaciones
-- [ ] Integración con brokers
 
 ### Fase 3: Avanzado 📋
 - [ ] Optimización por Markowitz

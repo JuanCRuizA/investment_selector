@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-01-12T13:05:00.243343",
+  "project": "Portfolio Construction via Clustering",
+  "version": "1.0",
+  "author": "Juan Carlos Ruiz Arteaga",
+  "n_activos": 467,
+  "n_perfiles": 5,
+  "perfiles": [
+    "conservador",
+    "moderado",
+    "agresivo",
+    "especulativo",
+    "normal"
+  ],
+  "train_period": "2010-12-23 a 2023-12-29",
+  "test_period": "2024-01-02 a 2025-12-19",
+  "benchmark": "SPY",
+  "capital_inicial": 10000,
+  "costo_transaccion": 0.001,
+  "files_generated": [
+    "portfolios",
+    "segments",
+    "backtest_summary",
+    "equity_curves"
+  ]
+}

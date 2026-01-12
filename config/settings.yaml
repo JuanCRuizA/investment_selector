@@ -1,0 +1,197 @@
+# ================================================
+# Portfolio Construction via Clustering - Settings
+# ================================================
+# Archivo de configuración centralizado para el pipeline productivo
+# Autor: Juan Carlos Ruiz Arteaga
+# Fecha: Enero 2026
+# ================================================
+
+# ================================================
+# DATOS Y RUTAS
+# ================================================
+data:
+  # Base de datos fuente (SQLite)
+  database_path: "data/trading_data.db"
+  table_name: "prices_daily"
+  ticker_column: "symbol"         # Nombre de la columna de ticker en la BD
+  date_column: "date"             # Nombre de la columna de fecha
+  
+  # Directorios de output
+  processed_dir: "data/processed"
+  segmentation_dir: "data/segmentacion_final"
+  reports_dir: "reports"
+  outputs_dir: "outputs/api"
+  
+  # Archivos de salida principales
+  prices_train_file: "prices_train.csv"
+  prices_test_file: "prices_test.csv"
+  features_file: "features_matrix.csv"
+  valid_tickers_file: "valid_tickers.csv"
+
+# ================================================
+# PARÁMETROS DE DATOS
+# ================================================
+data_params:
+  # Filtros de datos
+  min_years: 5                    # Mínimo de años de historial requerido
+  min_observations: 1260          # 5 años * 252 días de trading
+  benchmark_ticker: "SPY"         # Ticker del benchmark
+  
+  # Split de datos
+  train_end_date: "2023-12-31"    # Fin del período de entrenamiento
+  test_start_date: "2024-01-01"   # Inicio del período de prueba (backtest)
+  
+  # Manejo de valores faltantes
+  fillna_method: "ffill"          # Método: 'ffill', 'bfill', 'interpolate'
+  impute_adj_close_from_close: true  # Si adj_close es null, usar close
+
+# ================================================
+# PARÁMETROS FINANCIEROS
+# ================================================
+financial_params:
+  trading_days: 252               # Días de trading por año
+  risk_free_rate: 0.05            # Tasa libre de riesgo anual (5%)
+  confidence_level: 0.05          # Nivel de confianza para VaR/CVaR (95%)
+
+# ================================================
+# PARÁMETROS DE FEATURE ENGINEERING
+# ================================================
+features:
+  # Features a calcular (21 métricas)
+  metrics:
+    - return_total
+    - return_annualized
+    - return_mean_daily
+    - volatility_annual
+    - downside_dev_annual
+    - max_drawdown
+    - var_95
+    - cvar_95
+    - sharpe_ratio
+    - sortino_ratio
+    - calmar_ratio
+    - beta
+    - alpha_annual
+    - r_squared
+    - correlation_spy
+    - skewness
+    - kurtosis
+    - positive_return_ratio
+    - gain_loss_ratio
+    - vol_of_vol
+    - momentum_6m
+  
+  # Features para clustering (subconjunto)
+  clustering_features:
+    - return_annualized
+    - volatility_annual
+    - sharpe_ratio
+    - sortino_ratio
+    - max_drawdown
+    - var_95
+    - cvar_95
+    - beta
+    - skewness
+    - kurtosis
+
+# ================================================
+# PARÁMETROS DE CLUSTERING
+# ================================================
+clustering:
+  # DBSCAN para detección de outliers
+  dbscan:
+    min_samples: 5
+    eps_percentile: 90            # Percentil para calcular eps automáticamente
+    
+  # K-Means para segmentación principal
+  kmeans:
+    n_clusters: 4                 # Número óptimo de clusters (excluyendo outliers)
+    random_state: 42
+    n_init: 10
+    
+  # Nombres de segmentos (mapeo de cluster_id a nombre)
+  segment_names:
+    -1: "Outliers"
+    0: "Conservador"
+    1: "Alto Rendimiento"
+    2: "Moderado"
+    3: "Estable"
+
+# ================================================
+# PARÁMETROS DE MOMENTUM SCORE
+# ================================================
+momentum_score:
+  # Pesos de la fórmula de selección
+  weights:
+    return_annualized: 0.35       # 35% - Retorno histórico
+    momentum_6m: 0.30             # 30% - Momentum reciente
+    sharpe_ratio: 0.15            # 15% - Eficiencia riesgo-retorno
+    beta: 0.20                    # 20% - Exposición al mercado (positivo en mercados alcistas)
+  
+  # Período de momentum
+  momentum_days: 126              # ~6 meses de trading
+  
+  # Filtro de outliers
+  outlier_min_return: 0.0         # Solo incluir outliers con retorno > 0
+
+# ================================================
+# PARÁMETROS DE BACKTESTING
+# ================================================
+backtesting:
+  initial_capital: 10000          # Capital inicial en USD
+  
+  # Costos de transacción (basados en brokers retail de EE.UU.)
+  transaction_costs:
+    commission_per_order: 0.00    # $0 en la mayoría de brokers modernos
+    sec_fee_rate: 0.0000229       # SEC Fee: $22.90 por $1M vendidos
+    finra_taf_rate: 0.000145      # FINRA TAF: $0.000145 por acción
+    spread_estimated: 0.0005      # Spread bid-ask: ~0.05% (5 bps)
+    slippage_estimated: 0.0005    # Slippage: ~0.05% (5 bps)
+  
+  # Costo total simplificado (round-trip)
+  total_cost_roundtrip: 0.001     # 0.10% = 10 bps (compra + venta)
+  
+  # Risk-free rate para métricas (período 2024)
+  risk_free_rate_backtest: 0.045  # 4.5% (tasas 2024)
+  
+  # Frecuencia de rebalanceo
+  rebalance_frequency: "ME"       # 'ME' = mensual, 'QE' = trimestral, null = buy&hold
+
+# ================================================
+# PARÁMETROS DE PORTAFOLIO
+# ================================================
+portfolio:
+  # Número de activos por portafolio
+  assets_per_portfolio: 10
+  
+  # Método de ponderación
+  weighting_method: "equal"       # 'equal', 'score_weighted', 'optimized'
+  
+  # Reglas anti-concentración
+  max_weight_per_asset: 0.20      # Máximo 20% por activo
+  max_weight_per_cluster: 0.40    # Máximo 40% por cluster
+
+# ================================================
+# REENTRENAMIENTO
+# ================================================
+retraining:
+  enabled: true
+  frequency_months: 6             # Reentrenar cada 6 meses
+  auto_update_segments: true      # Actualizar nombres de segmentos automáticamente
+
+# ================================================
+# LOGGING Y DEBUG
+# ================================================
+logging:
+  level: "INFO"                   # DEBUG, INFO, WARNING, ERROR
+  log_file: "logs/pipeline.log"
+  console_output: true
+  timestamp_format: "%Y-%m-%d %H:%M:%S"
+
+# ================================================
+# VERSIONAMIENTO
+# ================================================
+versioning:
+  enabled: true
+  output_format: "timestamp"      # 'timestamp' o 'hash'
+  keep_versions: 5                # Número de versiones a mantener

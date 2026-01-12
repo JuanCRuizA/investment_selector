@@ -25,6 +25,7 @@ empyrical>=0.5.5
 # === Utilities ===
 tqdm>=4.65.0
 pyyaml>=6.0
+pathlib2>=2.3.7  # Para compatibilidad Python 3.8+
 
 # === Jupyter ===
 jupyter>=1.0.0

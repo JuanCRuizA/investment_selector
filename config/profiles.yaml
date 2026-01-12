@@ -1,0 +1,185 @@
+# ================================================
+# Investment Profiles Configuration
+# ================================================
+# Definición de los 5 perfiles de inversión
+# Cada perfil define la distribución de activos por cluster
+# Autor: Juan Carlos Ruiz Arteaga
+# Fecha: Enero 2026
+# ================================================
+
+# ================================================
+# DESCRIPCIÓN DE CLUSTERS
+# ================================================
+# Cluster -1: Outliers (comportamiento atípico)
+# Cluster  0: Conservador (baja volatilidad, beta bajo)
+# Cluster  1: Alto Rendimiento (retornos superiores, beta > 1)
+# Cluster  2: Moderado (balance riesgo-retorno)
+# Cluster  3: Estable (muy baja volatilidad, drawdown mínimo)
+# ================================================
+
+profiles:
+  # ================================================
+  # PERFIL CONSERVADOR 🛡️
+  # ================================================
+  conservador:
+    name: "Conservador"
+    emoji: "🛡️"
+    description: "Prioriza la estabilidad y preservación del capital. Ideal para inversores con baja tolerancia al riesgo o cerca de objetivos financieros."
+    
+    # Distribución de activos por cluster (total = 10)
+    distribution:
+      3: 6    # 60% Estable
+      0: 2    # 20% Conservador
+      2: 2    # 20% Moderado
+    
+    # Nombres de clusters incluidos (para display)
+    clusters_included:
+      - "Estable (C3)"
+      - "Conservador (C0)"
+      - "Moderado (C2)"
+    
+    # Características esperadas
+    expected_metrics:
+      volatility: "Baja"
+      beta: "< 0.8"
+      drawdown: "Controlado"
+      sharpe_target: "> 0.5"
+    
+    # Recomendaciones
+    recommendations:
+      - "Horizonte de inversión: corto/mediano plazo (1-3 años)"
+      - "Priorizar protección de capital sobre crecimiento"
+      - "Adecuado para portafolios de jubilación cercana"
+  
+  # ================================================
+  # PERFIL MODERADO ⚖️
+  # ================================================
+  moderado:
+    name: "Moderado"
+    emoji: "⚖️"
+    description: "Balance entre crecimiento y estabilidad. Busca rendimientos superiores al mercado manteniendo volatilidad controlada."
+    
+    distribution:
+      1: 4    # 40% Alto Rendimiento
+      2: 3    # 30% Moderado
+      3: 3    # 30% Estable
+    
+    clusters_included:
+      - "Alto Rendimiento (C1)"
+      - "Moderado (C2)"
+      - "Estable (C3)"
+    
+    expected_metrics:
+      volatility: "Media"
+      beta: "0.8 - 1.2"
+      drawdown: "Moderado"
+      sharpe_target: "> 0.7"
+    
+    recommendations:
+      - "Horizonte de inversión: mediano plazo (3-5 años)"
+      - "Balance clásico 60/40 adaptado a clusters"
+      - "Rebalanceo trimestral recomendado"
+  
+  # ================================================
+  # PERFIL AGRESIVO 🚀
+  # ================================================
+  agresivo:
+    name: "Agresivo"
+    emoji: "🚀"
+    description: "Busca alto rendimiento con exposición a beta alto. Solo incluye outliers con rendimiento positivo para maximizar crecimiento en mercados alcistas."
+    
+    distribution:
+      1: 7    # 70% Alto Rendimiento
+      2: 2    # 20% Moderado
+      -1: 1   # 10% Outliers+ (solo positivos)
+    
+    clusters_included:
+      - "Alto Rendimiento (C1)"
+      - "Moderado (C2)"
+      - "Outliers+ (C-1)"
+    
+    expected_metrics:
+      volatility: "Alta"
+      beta: "> 1.2"
+      drawdown: "Potencialmente alto"
+      sharpe_target: "> 1.0"
+    
+    recommendations:
+      - "Horizonte de inversión: largo plazo (5+ años)"
+      - "Alta tolerancia a drawdowns temporales"
+      - "Ideal para acumulación agresiva de capital"
+  
+  # ================================================
+  # PERFIL ESPECULATIVO 💎
+  # ================================================
+  especulativo:
+    name: "Especulativo"
+    emoji: "💎"
+    description: "Máximo rendimiento potencial con alta exposición a outliers positivos. Mayor riesgo, mayor recompensa potencial."
+    
+    distribution:
+      1: 5    # 50% Alto Rendimiento
+      -1: 3   # 30% Outliers+ (solo positivos)
+      2: 2    # 20% Moderado
+    
+    clusters_included:
+      - "Alto Rendimiento (C1)"
+      - "Outliers+ (C-1)"
+      - "Moderado (C2)"
+    
+    expected_metrics:
+      volatility: "Muy alta"
+      beta: "> 1.5"
+      drawdown: "Alto"
+      sharpe_target: "Variable"
+    
+    recommendations:
+      - "Solo para capital que puede perderse"
+      - "No más del 10-20% del patrimonio total"
+      - "Requiere monitoreo activo y stops"
+  
+  # ================================================
+  # PERFIL NORMAL/BALANCEADO 📊
+  # ================================================
+  normal:
+    name: "Normal"
+    emoji: "📊"
+    description: "Exposición balanceada a TODOS los clusters con 2 activos de cada uno. Máxima diversificación por segmento."
+    
+    distribution:
+      -1: 2   # 20% Outliers+ (solo positivos)
+      0: 2    # 20% Conservador
+      1: 2    # 20% Alto Rendimiento
+      2: 2    # 20% Moderado
+      3: 2    # 20% Estable
+    
+    clusters_included:
+      - "Outliers+ (C-1)"
+      - "Conservador (C0)"
+      - "Alto Rendimiento (C1)"
+      - "Moderado (C2)"
+      - "Estable (C3)"
+    
+    expected_metrics:
+      volatility: "Media"
+      beta: "≈ 1.0"
+      drawdown: "Moderado"
+      sharpe_target: "> 0.6"
+    
+    recommendations:
+      - "Diversificación máxima por segmento"
+      - "Ideal para comparar con otros perfiles"
+      - "Baseline para análisis de performance"
+
+# ================================================
+# CONFIGURACIÓN DE SELECCIÓN
+# ================================================
+selection:
+  # Usar solo outliers con rendimiento positivo en todos los perfiles
+  outlier_filter: "positive_return_only"
+  
+  # Criterio de desempate si hay activos con igual score
+  tiebreaker: "sharpe_ratio"
+  
+  # Semilla para reproducibilidad
+  random_seed: 42

@@ -216,3 +216,243 @@ def apply_concentration_rules(weights: Dict[str, float],
         adjusted = {k: v/total for k, v in adjusted.items()}
     
     return adjusted
+
+
+# ================================================
+# FUNCIONES NUEVAS PARA PIPELINE PRODUCTIVO
+# ================================================
+
+def normalize_min_max(series: pd.Series) -> pd.Series:
+    """
+    Normalizar serie usando min-max scaling (0-1).
+    
+    Args:
+        series: Serie a normalizar
+        
+    Returns:
+        Serie normalizada
+    """
+    min_val = series.min()
+    max_val = series.max()
+    
+    if max_val - min_val == 0:
+        return pd.Series([0.5] * len(series), index=series.index)
+    
+    return (series - min_val) / (max_val - min_val)
+
+
+def calculate_momentum_score(df_segmented: pd.DataFrame,
+                             df_prices: pd.DataFrame = None,
+                             weights: Dict[str, float] = None,
+                             momentum_days: int = 126) -> pd.DataFrame:
+    """
+    Calcular Score de Momentum para selección de activos.
+    
+    Fórmula: Score = w1×Return + w2×Momentum_6m + w3×Sharpe + w4×Beta
+    
+    En mercados alcistas, beta alto es POSITIVO (amplifica ganancias).
+    
+    Args:
+        df_segmented: DataFrame con activos segmentados y métricas
+        df_prices: DataFrame de precios (para recalcular momentum si es necesario)
+        weights: Diccionario con pesos {'return_annualized': 0.35, ...}
+        momentum_days: Días para cálculo de momentum
+        
+    Returns:
+        DataFrame con columna 'score_compuesto' agregada
+    """
+    df = df_segmented.copy()
+    
+    # Pesos por defecto
+    if weights is None:
+        weights = {
+            'return_annualized': 0.35,
+            'momentum_6m': 0.30,
+            'sharpe_ratio': 0.15,
+            'beta': 0.20
+        }
+    
+    # Recalcular momentum si no existe y tenemos precios
+    if 'momentum_6m' not in df.columns and df_prices is not None:
+        momentum_dict = {}
+        for ticker in df.index:
+            if ticker in df_prices.columns:
+                prices = df_prices[ticker].dropna()
+                if len(prices) >= momentum_days:
+                    momentum_dict[ticker] = (prices.iloc[-1] / prices.iloc[-momentum_days]) - 1
+                else:
+                    momentum_dict[ticker] = (prices.iloc[-1] / prices.iloc[0]) - 1
+            else:
+                momentum_dict[ticker] = 0
+        df['momentum_6m'] = pd.Series(momentum_dict)
+    
+    # Normalizar cada métrica (min-max)
+    for metric in weights.keys():
+        if metric in df.columns:
+            df[f'{metric}_norm'] = normalize_min_max(df[metric])
+        else:
+            df[f'{metric}_norm'] = 0.5  # Valor neutro si falta la métrica
+    
+    # Calcular score compuesto
+    df['score_compuesto'] = sum(
+        weights[metric] * df[f'{metric}_norm']
+        for metric in weights.keys()
+    )
+    
+    return df
+
+
+def select_portfolio_by_profile(df_segmented: pd.DataFrame,
+                                 profile_config: Dict,
+                                 outlier_min_return: float = 0.0,
+                                 seed: int = 42) -> pd.DataFrame:
+    """
+    Seleccionar activos para un perfil de inversión específico.
+    
+    Args:
+        df_segmented: DataFrame con activos segmentados y scores
+        profile_config: Configuración del perfil (nombre, distribución)
+        outlier_min_return: Retorno mínimo para incluir outliers
+        seed: Semilla para reproducibilidad
+        
+    Returns:
+        DataFrame con activos seleccionados y pesos
+    """
+    np.random.seed(seed)
+    
+    distribution = profile_config.get('distribution', {})
+    
+    selected_assets = []
+    
+    for cluster_id, n_assets in distribution.items():
+        cluster_id = int(cluster_id)  # Asegurar tipo int
+        
+        # Filtrar activos del cluster
+        df_cluster = df_segmented[df_segmented['segmento'] == cluster_id].copy()
+        
+        # FILTRO ESPECIAL: Para outliers (cluster -1), solo incluir rendimiento positivo
+        if cluster_id == -1:
+            df_cluster = df_cluster[df_cluster['return_annualized'] > outlier_min_return]
+            if len(df_cluster) == 0:
+                print(f"   ⚠️ No hay outliers con rendimiento > {outlier_min_return:.1%}")
+                continue
+        
+        if len(df_cluster) == 0:
+            print(f"   ⚠️ No hay activos en cluster {cluster_id}")
+            continue
+        
+        # Ordenar por score y seleccionar los mejores
+        df_cluster = df_cluster.sort_values('score_compuesto', ascending=False)
+        
+        n_to_select = min(n_assets, len(df_cluster))
+        selected = df_cluster.head(n_to_select)
+        
+        selected_assets.append(selected)
+    
+    # Combinar todos los activos
+    if not selected_assets:
+        return pd.DataFrame()
+    
+    df_portfolio = pd.concat(selected_assets, ignore_index=False)
+    
+    # Agregar peso equiponderado
+    df_portfolio['peso'] = 1 / len(df_portfolio)
+    
+    return df_portfolio.reset_index()
+
+
+def build_all_portfolios(df_segmented: pd.DataFrame,
+                          profiles_config: Dict,
+                          outlier_min_return: float = 0.0) -> Dict[str, pd.DataFrame]:
+    """
+    Construir todos los portafolios para todos los perfiles.
+    
+    Args:
+        df_segmented: DataFrame con activos segmentados y scores
+        profiles_config: Configuración de todos los perfiles
+        outlier_min_return: Retorno mínimo para outliers
+        
+    Returns:
+        Diccionario {nombre_perfil: df_portfolio}
+    """
+    portfolios = {}
+    
+    profiles = profiles_config.get('profiles', {})
+    
+    for profile_name, profile_config in profiles.items():
+        print(f"   📊 Construyendo portafolio: {profile_name.capitalize()}")
+        
+        df_portfolio = select_portfolio_by_profile(
+            df_segmented=df_segmented,
+            profile_config=profile_config,
+            outlier_min_return=outlier_min_return
+        )
+        
+        if len(df_portfolio) > 0:
+            portfolios[profile_name] = df_portfolio
+            print(f"      ✅ {len(df_portfolio)} activos seleccionados")
+        else:
+            print(f"      ⚠️ No se pudo construir portafolio")
+    
+    return portfolios
+
+
+def run_portfolio_selection(df_segmented: pd.DataFrame,
+                            df_prices: pd.DataFrame,
+                            config: Dict) -> Dict[str, pd.DataFrame]:
+    """
+    Ejecutar proceso completo de selección de portafolios.
+    
+    Args:
+        df_segmented: DataFrame con activos segmentados
+        df_prices: DataFrame de precios (para momentum)
+        config: Configuración del pipeline
+        
+    Returns:
+        Diccionario con portafolios por perfil
+    """
+    from .utils import print_step_header, print_success, print_info, load_config
+    
+    print_step_header("PORTFOLIO SELECTION", 4)
+    
+    # Cargar configuración de perfiles
+    profiles_config = load_config('profiles')
+    
+    # Configuración de momentum score
+    momentum_config = config.get('momentum_score', {})
+    weights = momentum_config.get('weights', None)
+    momentum_days = momentum_config.get('momentum_days', 126)
+    outlier_min_return = momentum_config.get('outlier_min_return', 0.0)
+    
+    print_info("Calculando Score de Momentum para todos los activos...")
+    print_info(f"Pesos: {weights}")
+    
+    # Calcular scores
+    df_with_scores = calculate_momentum_score(
+        df_segmented=df_segmented,
+        df_prices=df_prices,
+        weights=weights,
+        momentum_days=momentum_days
+    )
+    
+    print_success(f"Scores calculados para {len(df_with_scores)} activos")
+    
+    # Top 5 por score
+    top5 = df_with_scores.nlargest(5, 'score_compuesto')[
+        ['segmento_nombre', 'return_annualized', 'momentum_6m', 'sharpe_ratio', 'beta', 'score_compuesto']
+    ]
+    print_info("Top 5 activos por score:")
+    print(top5.to_string())
+    
+    # Construir portafolios
+    print_info("\nConstruyendo portafolios por perfil...")
+    
+    portfolios = build_all_portfolios(
+        df_segmented=df_with_scores,
+        profiles_config=profiles_config,
+        outlier_min_return=outlier_min_return
+    )
+    
+    print_success(f"Portafolios construidos: {list(portfolios.keys())}")
+    
+    return portfolios, df_with_scores
