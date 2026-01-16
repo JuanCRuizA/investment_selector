@@ -34,6 +34,95 @@ class ChartFactory:
         return fig
     
     @classmethod
+    def create_pie_chart(
+        cls,
+        values: list,
+        labels: list,
+        title: str = "",
+        hole: float = 0.4,
+        colors: list = None
+    ) -> go.Figure:
+        """
+        Create a pie/donut chart.
+        
+        Args:
+            values: List of values
+            labels: List of labels
+            title: Chart title
+            hole: Size of hole for donut chart (0-1)
+            colors: Optional list of colors
+            
+        Returns:
+            Plotly figure
+        """
+        fig = go.Figure(data=[go.Pie(
+            labels=labels,
+            values=values,
+            hole=hole,
+            marker=dict(colors=colors) if colors else None,
+            textinfo='label+percent',
+            textposition='outside',
+            hovertemplate='%{label}<br>%{value:.1f}%<br>%{percent}<extra></extra>'
+        )])
+        
+        fig.update_layout(
+            title={'text': title, 'x': 0.5} if title else None,
+            showlegend=True,
+            legend=dict(orientation='h', yanchor='bottom', y=-0.2, xanchor='center', x=0.5),
+            margin=dict(l=20, r=20, t=40, b=20),
+            height=350
+        )
+        
+        return fig
+    
+    @classmethod
+    def create_line_chart(
+        cls,
+        df: pd.DataFrame,
+        title: str = "",
+        colors: list = None,
+        x_title: str = "Fecha",
+        y_title: str = "Valor"
+    ) -> go.Figure:
+        """
+        Create a simple line chart from DataFrame columns.
+        
+        Args:
+            df: DataFrame where each column is a series
+            title: Chart title
+            colors: Optional list of colors
+            x_title: X axis title
+            y_title: Y axis title
+            
+        Returns:
+            Plotly figure
+        """
+        fig = go.Figure()
+        
+        default_colors = ['#1E88E5', '#43A047', '#FDD835', '#E53935', '#8E24AA']
+        
+        for i, col in enumerate(df.columns):
+            color = colors[i] if colors and i < len(colors) else default_colors[i % len(default_colors)]
+            fig.add_trace(go.Scatter(
+                x=df.index,
+                y=df[col],
+                name=col,
+                line=dict(color=color, width=2),
+                mode='lines'
+            ))
+        
+        fig.update_layout(
+            title={'text': title, 'x': 0.5} if title else None,
+            xaxis_title=x_title,
+            yaxis_title=y_title,
+            template='plotly_white',
+            hovermode='x unified',
+            margin=dict(l=50, r=20, t=50, b=50)
+        )
+        
+        return fig
+    
+    @classmethod
     def create_equity_curve(
         cls,
         df: pd.DataFrame,

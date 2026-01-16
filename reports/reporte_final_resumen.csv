@@ -1,0 +1,9 @@
+Métrica,Valor
+Total Activos Analizados,468
+Período Entrenamiento,2021-01-04 a 2023-12-29
+Período Prueba,2024-01-02 a 2025-12-19
+Número de Segmentos,5
+Número de Perfiles,5
+Benchmark,SPY (S&P 500)
+Capital Inicial Backtest,"$100,000"
+Costos de Transacción,0.10% round-trip

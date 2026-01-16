@@ -1,0 +1,8 @@
+artifacts:
+  backtest_summary: C:\Users\carlo\Documents\4.DS\riskmanagement2025\outputs\api\backtest_summary.csv
+  equity_curves: C:\Users\carlo\Documents\4.DS\riskmanagement2025\outputs\api\equity_curves.csv
+  metadata: C:\Users\carlo\Documents\4.DS\riskmanagement2025\outputs\api\metadata.csv
+  metadata_json: C:\Users\carlo\Documents\4.DS\riskmanagement2025\outputs\api\metadata.json
+  portfolios: C:\Users\carlo\Documents\4.DS\riskmanagement2025\outputs\api\portfolios.csv
+  segments: C:\Users\carlo\Documents\4.DS\riskmanagement2025\outputs\api\segments.csv
+generated_at: '2026-01-12T13:05:00.246869'

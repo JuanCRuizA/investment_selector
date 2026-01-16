@@ -110,7 +110,7 @@ def _render_monto_input() -> float:
         "Monto inicial (USD)",
         min_value=1000.0,
         max_value=10_000_000.0,
-        value=100_000.0,
+        value=10_000.0,
         step=1000.0,
         format="%.2f",
         key='monto_input',

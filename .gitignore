@@ -1,11 +1,15 @@
 # === Datos sensibles y bases de datos ===
-data/
+data/raw/
+data/processed/
 *.db
 *.sqlite
 *.sqlite3
-*.csv
-*.xlsx
-*.xls
+
+# === Archivos de datos grandes (NO incluir en repo) ===
+# Los CSVs en reports/ SÍ se incluyen para Streamlit Cloud
+# data/*.csv  # Comentado: data/ ya está excluido
+# *.xlsx
+# *.xls
 
 # === Credenciales y secretos ===
 .env
@@ -87,3 +91,16 @@ models/*.pth
 # Descomenta si no quieres subir reportes
 # reports/figures/*.png
 # reports/*.csv
+
+# === Archivos específicos para excluir del despliegue ===
+# Notebooks con outputs (mantener solo .ipynb sin outputs o usar nbstripout)
+notebooks/.ipynb_checkpoints/
+
+# Logs de ejecución
+logs/*.log
+
+# Outputs temporales del pipeline
+outputs/api/
+
+# Cache de Python en subcarpetas
+**/__pycache__/

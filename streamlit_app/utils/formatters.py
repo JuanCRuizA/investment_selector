@@ -83,7 +83,7 @@ class Formatters:
         return f"{value:.1%}"
     
     @staticmethod
-    def style_dataframe(df: pd.DataFrame, metric_columns: list = None) -> pd.io.formats.style.Styler:
+    def style_dataframe(df: pd.DataFrame, metric_columns: list = None):
         """
         Apply consistent styling to a dataframe.
         

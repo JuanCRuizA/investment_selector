@@ -1,0 +1,11 @@
+ticker,segmento,peso,monto,monto_usd,peso_pct
+AMD,Outliers,0.1,1000.0,1000.0,10.0
+URI,Moderado,0.1,1000.0,1000.0,10.0
+EPAM,Moderado,0.1,1000.0,1000.0,10.0
+ALL,Alto Rendimiento,0.1,1000.0,1000.0,10.0
+HON,Alto Rendimiento,0.1,1000.0,1000.0,10.0
+IVV,Alto Rendimiento,0.1,1000.0,1000.0,10.0
+VOO,Alto Rendimiento,0.1,1000.0,1000.0,10.0
+ECL,Alto Rendimiento,0.1,1000.0,1000.0,10.0
+VTI,Alto Rendimiento,0.1,1000.0,1000.0,10.0
+PAYX,Alto Rendimiento,0.1,1000.0,1000.0,10.0

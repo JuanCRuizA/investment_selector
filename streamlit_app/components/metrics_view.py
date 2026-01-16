@@ -182,12 +182,12 @@ def _render_detalle_activo(
             # Normalizar a 100
             precios_norm = precios / precios.iloc[0] * 100
             
-            fig = ChartFactory.create_equity_curve(
-                df_equity=pd.DataFrame({ticker: precios_norm}),
+            fig = ChartFactory.create_line_chart(
+                df=pd.DataFrame({ticker: precios_norm}),
                 title="",
                 colors=['#1E88E5']
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key=f'precio_{ticker}')
     
     with col_chart2:
         st.markdown("**Drawdown**")

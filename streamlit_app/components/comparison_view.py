@@ -113,17 +113,27 @@ def _render_comparacion_metricas(
     st.subheader("📊 Comparación de Métricas")
     
     def get_metricas(perfil):
-        df_p = df_summary[df_summary['perfil'].str.lower() == perfil.lower()]
+        perfil_col = 'Perfil' if 'Perfil' in df_summary.columns else 'perfil'
+        df_p = df_summary[df_summary[perfil_col].str.lower() == perfil.lower()]
         if df_p.empty:
             return {}
         row = df_p.iloc[0]
+        
+        # Función helper para obtener valores con múltiples nombres posibles
+        def get_val(cols_list, default=0):
+            for c in cols_list:
+                if c in row.index:
+                    return row[c]
+            return default
+        
         return {
-            'retorno_total': row.get('retorno_total', row.get('total_return', 0)),
-            'cagr': row.get('cagr', row.get('annual_return', 0)),
-            'volatilidad': row.get('volatilidad', row.get('volatility', 0)),
-            'sharpe': row.get('sharpe', row.get('sharpe_ratio', 0)),
-            'max_drawdown': row.get('max_drawdown', 0),
-            'sortino': row.get('sortino', row.get('sortino_ratio', 0)),
+            'retorno_total': get_val(['Retorno Portafolio', 'retorno_total', 'total_return']),
+            'cagr': get_val(['CAGR', 'cagr', 'annual_return']),
+            'volatilidad': get_val(['Volatilidad', 'volatilidad', 'volatility']),
+            'sharpe': get_val(['Sharpe Ratio', 'sharpe', 'sharpe_ratio']),
+            'max_drawdown': get_val(['Max Drawdown', 'max_drawdown']),
+            'sortino': get_val(['Sortino', 'sortino', 'sortino_ratio']),
+            'alpha': get_val(['Alpha', 'alpha']),
         }
     
     m1 = get_metricas(perfil1)
@@ -186,9 +196,16 @@ def _render_comparacion_equity(
     """Renderiza comparación de equity curves."""
     st.subheader("📈 Comparación de Rendimiento")
     
-    # Determinar columnas
-    col1 = 'portafolio' if 'portafolio' in df_eq1.columns else 'equity'
-    col2 = 'portafolio' if 'portafolio' in df_eq2.columns else 'equity'
+    # Función para detectar columna de portafolio
+    def get_portfolio_col(df):
+        for col in df.columns:
+            col_lower = col.lower()
+            if 'portafolio' in col_lower or col_lower == 'equity':
+                return col
+        return df.columns[1] if len(df.columns) > 1 else df.columns[0]
+    
+    col1 = get_portfolio_col(df_eq1)
+    col2 = get_portfolio_col(df_eq2)
     
     # Normalizar a monto inicial
     eq1 = df_eq1[col1] / df_eq1[col1].iloc[0] * monto_inversion
@@ -205,8 +222,8 @@ def _render_comparacion_equity(
         ColorPalette.get_profile_color(perfil2)
     ]
     
-    fig = ChartFactory.create_equity_curve(
-        df_equity=df_combined,
+    fig = ChartFactory.create_line_chart(
+        df=df_combined,
         title="Evolución Comparativa del Portafolio",
         colors=colors
     )
@@ -244,8 +261,16 @@ def _render_comparacion_riesgo(
     """Renderiza comparación de métricas de riesgo."""
     st.subheader("📉 Comparación de Riesgo (Drawdown)")
     
-    col1 = 'portafolio' if 'portafolio' in df_eq1.columns else 'equity'
-    col2 = 'portafolio' if 'portafolio' in df_eq2.columns else 'equity'
+    # Función para detectar columna de portafolio
+    def get_portfolio_col(df):
+        for col in df.columns:
+            col_lower = col.lower()
+            if 'portafolio' in col_lower or col_lower == 'equity':
+                return col
+        return df.columns[1] if len(df.columns) > 1 else df.columns[0]
+    
+    col1 = get_portfolio_col(df_eq1)
+    col2 = get_portfolio_col(df_eq2)
     
     # Calcular drawdowns
     eq1 = df_eq1[col1]
@@ -312,17 +337,27 @@ def _render_radar_comparativo(
     """Renderiza gráfico radar comparativo."""
     st.subheader("🎯 Perfil de Riesgo-Retorno")
     
+    perfil_col = 'Perfil' if 'Perfil' in df_summary.columns else 'perfil'
+    
     def get_metricas_norm(perfil):
-        df_p = df_summary[df_summary['perfil'].str.lower() == perfil.lower()]
+        df_p = df_summary[df_summary[perfil_col].str.lower() == perfil.lower()]
         if df_p.empty:
             return None
         row = df_p.iloc[0]
+        
+        # Función helper para obtener valores
+        def get_val(cols_list, default=0):
+            for c in cols_list:
+                if c in row.index:
+                    return row[c]
+            return default
+        
         return {
-            'Retorno': min(row.get('retorno_total', row.get('total_return', 0)) * 100, 100),
-            'Sharpe': min(row.get('sharpe', row.get('sharpe_ratio', 0)) * 20, 100),
-            'Estabilidad': max(100 - abs(row.get('max_drawdown', 0)) * 100, 0),
-            'Consistencia': row.get('win_rate', 0.5) * 100,
-            'Riesgo Ajustado': min(row.get('sortino', row.get('sortino_ratio', 0)) * 20, 100),
+            'Retorno': min(get_val(['Retorno Portafolio', 'retorno_total', 'total_return']) * 100, 100),
+            'Sharpe': min(get_val(['Sharpe Ratio', 'sharpe', 'sharpe_ratio']) * 20, 100),
+            'Estabilidad': max(100 - abs(get_val(['Max Drawdown', 'max_drawdown'])) * 100, 0),
+            'Consistencia': get_val(['Win Rate', 'win_rate'], 0.5) * 100,
+            'Riesgo Ajustado': min(get_val(['Sortino', 'sortino', 'sortino_ratio']) * 20, 100),
         }
     
     m1 = get_metricas_norm(perfil1)

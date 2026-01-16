@@ -20,8 +20,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        'Get Help': 'https://github.com/kycido72/riskmanagement2025',
-        'Report a bug': 'https://github.com/kycido72/riskmanagement2025/issues',
+        'Get Help': 'https://github.com/fantastic1121/stocks_portfolio_selector',
+        'Report a bug': 'https://github.com/fantastic1121/stocks_portfolio_selector/issues',
         'About': """
         ## Portfolio Selector v1.0
         
@@ -37,8 +37,13 @@ st.set_page_config(
 
 # Agregar el directorio padre al path para imports
 APP_DIR = Path(__file__).parent
+PROJECT_ROOT = APP_DIR.parent
+
+# Asegurar que los módulos de streamlit_app estén en el path
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 # Imports de módulos propios
 from core import DataLoader, PortfolioSelector
@@ -60,14 +65,12 @@ from components.export_utils import render_export_buttons
 @st.cache_resource
 def init_data_loader():
     """Inicializa el DataLoader (cacheado)."""
-    # Determinar ruta de datos
-    # En desarrollo: outputs/api/
-    # En producción: puede ser diferente
+    # Determinar ruta de datos - buscar reports/
     
     possible_paths = [
-        APP_DIR.parent / "outputs" / "api",  # Desarrollo
-        APP_DIR / "data",                     # Alternativa
-        Path("outputs/api"),                  # Relativo
+        APP_DIR.parent / "reports",           # Principal: ../reports/
+        APP_DIR / "reports",                  # Alternativa
+        Path("reports"),                      # Relativo
     ]
     
     for data_path in possible_paths:
@@ -75,13 +78,22 @@ def init_data_loader():
             return DataLoader(str(data_path))
     
     # Si no encuentra, usar el primero y dejar que falle con mensaje claro
-    return DataLoader(str(possible_paths[0]))
+    return DataLoader()
 
 
 @st.cache_resource
 def init_portfolio_selector(_data_loader):
     """Inicializa el PortfolioSelector (cacheado)."""
-    return PortfolioSelector(_data_loader)
+    # Cargar los DataFrames necesarios
+    portfolios_df = _data_loader.load_portfolios()
+    segments_df = _data_loader.load_segments()
+    
+    if portfolios_df is None:
+        portfolios_df = pd.DataFrame()
+    if segments_df is None:
+        segments_df = pd.DataFrame()
+    
+    return PortfolioSelector(portfolios_df, segments_df)
 
 
 def init_session_state():
@@ -109,7 +121,7 @@ def render_header():
     with col2:
         st.markdown("""
         <div style='text-align: right; padding-top: 20px;'>
-            <a href='https://github.com/kycido72/riskmanagement2025' target='_blank'>
+            <a href='https://github.com/fantastic1121/stocks_portfolio_selector' target='_blank'>
                 📚 Documentación
             </a>
         </div>
@@ -169,17 +181,28 @@ def render_tabs(
         
         # Extraer métricas para exportación
         df_summary = data_loader.load_backtest_summary()
-        if df_summary is not None:
-            df_perfil = df_summary[df_summary['perfil'].str.lower() == config.perfil.lower()]
+        if df_summary is not None and not df_summary.empty:
+            # Buscar columna perfil (puede ser 'perfil' o 'Perfil')
+            perfil_col = 'Perfil' if 'Perfil' in df_summary.columns else 'perfil'
+            df_perfil = df_summary[df_summary[perfil_col].str.lower() == config.perfil.lower()]
             if not df_perfil.empty:
                 row = df_perfil.iloc[0]
+                
+                # Función helper para obtener valores con múltiples nombres posibles
+                def get_val(cols_list, default=0):
+                    for c in cols_list:
+                        if c in row.index:
+                            return row[c]
+                    return default
+                
                 st.session_state.metricas_backtest = {
-                    'retorno_total': row.get('retorno_total', row.get('total_return', 0)),
-                    'cagr': row.get('cagr', row.get('annual_return', 0)),
-                    'volatilidad': row.get('volatilidad', row.get('volatility', 0)),
-                    'sharpe': row.get('sharpe', row.get('sharpe_ratio', 0)),
-                    'max_drawdown': row.get('max_drawdown', 0),
-                    'sortino': row.get('sortino', row.get('sortino_ratio', 0)),
+                    'retorno_total': get_val(['Retorno Portafolio', 'retorno_total', 'total_return']),
+                    'cagr': get_val(['CAGR', 'cagr', 'annual_return']),
+                    'volatilidad': get_val(['Volatilidad', 'volatilidad', 'volatility']),
+                    'sharpe': get_val(['Sharpe Ratio', 'sharpe', 'sharpe_ratio']),
+                    'max_drawdown': get_val(['Max Drawdown', 'max_drawdown']),
+                    'sortino': get_val(['Sortino', 'sortino', 'sortino_ratio']),
+                    'alpha': get_val(['Alpha', 'alpha']),
                 }
     
     # Tab 3: Métricas

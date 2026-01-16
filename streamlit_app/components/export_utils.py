@@ -188,12 +188,13 @@ class ExportManager:
             pdf.ln(10)
             pdf.set_font('Arial', 'I', 8)
             pdf.multi_cell(0, 4, 
-                'Disclaimer: Este reporte es únicamente informativo. '
+                'Disclaimer: Este reporte es unicamente informativo. '
                 'Los rendimientos pasados no garantizan rendimientos futuros. '
-                'Consulte con un asesor financiero antes de tomar decisiones de inversión.'
+                'Consulte con un asesor financiero antes de tomar decisiones de inversion.'
             )
             
-            return pdf.output(dest='S').encode('latin-1')
+            # fpdf2: output() ya devuelve bytes directamente
+            return bytes(pdf.output())
             
         except Exception as e:
             st.error(f"Error generando PDF: {str(e)}")

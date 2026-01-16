@@ -1,10 +1,15 @@
 # 🏦 Sistema de Gestión de Portafolios con Machine Learning
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
-[![Status](https://img.shields.io/badge/Status-Completado-success.svg)]()
+[![Streamlit](https://img.shields.io/badge/Streamlit-Cloud-FF4B4B.svg)](https://streamlit.io/cloud)
+[![Status](https://img.shields.io/badge/Status-Production-success.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 Sistema de selección y construcción de portafolios de inversión basado en clustering K-Means, diseñado para clasificar activos financieros según características cuantitativas y adaptar las recomendaciones al perfil de riesgo del inversionista.
+
+## 🚀 Demo en Vivo
+
+**[🎯 Acceder a la Aplicación](https://stocks-portfolio-selector.streamlit.app)** *(Streamlit Cloud)*
 
 ---
 
@@ -17,6 +22,7 @@ Sistema de selección y construcción de portafolios de inversión basado en clu
 - [Pipeline de Producción](#-pipeline-de-producción)
 - [Resultados](#-resultados)
 - [Notebooks](#-notebooks)
+- [Despliegue en Streamlit Cloud](#-despliegue-en-streamlit-cloud)
 - [Roadmap](#-roadmap)
 - [Autor](#-autor)
 - [Disclaimer](#-disclaimer)
@@ -187,8 +193,8 @@ riskmanagement2025/
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/kycido72/riskmanagement2025.git
-cd riskmanagement2025
+git clone https://github.com/fantastic1121/stocks_portfolio_selector.git
+cd stocks_portfolio_selector
 
 # 2. Crear ambiente virtual con Conda
 conda create -n riskmanagementportfolio python=3.11
@@ -331,6 +337,68 @@ Resultados del backtesting con capital inicial de **$10,000 USD**:
 
 ---
 
+## ☁️ Despliegue en Streamlit Cloud
+
+### Configuración para Streamlit Cloud
+
+La aplicación está lista para desplegarse en [Streamlit Cloud](https://streamlit.io/cloud). Sigue estos pasos:
+
+#### 1. Conectar repositorio a Streamlit Cloud
+
+1. Ve a [share.streamlit.io](https://share.streamlit.io)
+2. Haz clic en "New app"
+3. Conecta tu cuenta de GitHub
+4. Selecciona el repositorio: `fantastic1121/stocks_portfolio_selector`
+
+#### 2. Configurar la aplicación
+
+| Campo | Valor |
+|-------|-------|
+| **Repository** | `fantastic1121/stocks_portfolio_selector` |
+| **Branch** | `main` |
+| **Main file path** | `streamlit_app/app.py` |
+
+#### 3. Deploy
+
+Haz clic en "Deploy!" y espera unos minutos mientras se construye la imagen.
+
+### Ejecución Local de la App Streamlit
+
+```bash
+# Desde la raíz del proyecto
+cd stocks_portfolio_selector
+streamlit run streamlit_app/app.py
+
+# O especificando el puerto
+streamlit run streamlit_app/app.py --server.port 8501
+```
+
+La aplicación estará disponible en `http://localhost:8501`
+
+### Estructura de la App Streamlit
+
+```
+streamlit_app/
+├── app.py                 # Punto de entrada principal
+├── requirements.txt       # Dependencias de la app
+├── core/                  # Lógica de negocio
+│   ├── data_loader.py     # Carga de datos CSV
+│   ├── portfolio_selector.py
+│   └── calculations.py
+├── components/            # Componentes de UI
+│   ├── sidebar.py
+│   ├── portfolio_view.py
+│   ├── backtest_view.py
+│   ├── metrics_view.py
+│   ├── comparison_view.py
+│   └── export_utils.py
+└── utils/                 # Utilidades
+    ├── charts.py
+    └── formatters.py
+```
+
+---
+
 ## 🗺️ Roadmap
 
 ### Fase 1: MVP ✅
@@ -363,7 +431,8 @@ Resultados del backtesting con capital inicial de **$10,000 USD**:
 
 **Juan Carlos Ruiz Arteaga**
 
-- GitHub: [@kycido72](https://github.com/kycido72)
+- GitHub: [@fantastic1121](https://github.com/fantastic1121)
+- Repositorio: [stocks_portfolio_selector](https://github.com/fantastic1121/stocks_portfolio_selector)
 - Proyecto desarrollado para el curso de Gestión de Riesgo 2025
 
 ---

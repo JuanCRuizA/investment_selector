@@ -131,10 +131,10 @@ def _render_graficos_distribucion(df_portafolio: pd.DataFrame, perfil: str):
         fig_activos = ChartFactory.create_pie_chart(
             values=df_pie['peso_pct'].tolist(),
             labels=df_pie['ticker'].tolist(),
-            title="",
+            title=None,
             hole=0.4
         )
-        st.plotly_chart(fig_activos, use_container_width=True)
+        st.plotly_chart(fig_activos, use_container_width=True, key='pie_activos')
     
     with col2:
         st.subheader("📊 Distribución por Segmento")
@@ -150,11 +150,11 @@ def _render_graficos_distribucion(df_portafolio: pd.DataFrame, perfil: str):
         fig_segmentos = ChartFactory.create_pie_chart(
             values=df_segmento['peso_pct'].tolist(),
             labels=df_segmento['label'].tolist(),
-            title="",
+            title=None,
             hole=0.4,
             colors=colors
         )
-        st.plotly_chart(fig_segmentos, use_container_width=True)
+        st.plotly_chart(fig_segmentos, use_container_width=True, key='pie_segmentos')
 
 
 def _render_detalle_segmentos(df_portafolio: pd.DataFrame):

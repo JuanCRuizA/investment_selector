@@ -107,15 +107,31 @@ def _render_equity_curve(
     # Preparar datos
     df = df_equity.copy()
     
-    # Verificar columnas disponibles
-    col_portafolio = 'portafolio' if 'portafolio' in df.columns else 'equity'
-    col_benchmark = 'benchmark' if 'benchmark' in df.columns else 'spy'
+    # Detectar columnas del portafolio (pueden ser Portafolio_{Perfil}, portafolio, equity, etc.)
+    col_portafolio = None
+    for col in df.columns:
+        col_lower = col.lower()
+        if 'portafolio' in col_lower or col_lower == 'equity':
+            col_portafolio = col
+            break
+    
+    # Detectar columna de benchmark (puede ser SPY_Benchmark, benchmark, spy, etc.)
+    col_benchmark = None
+    for col in df.columns:
+        col_lower = col.lower()
+        if 'benchmark' in col_lower or 'spy' in col_lower:
+            col_benchmark = col
+            break
+    
+    if col_portafolio is None:
+        st.error(f"No se encontró columna de portafolio. Columnas disponibles: {df.columns.tolist()}")
+        return
     
     # Escalar a monto inicial si es necesario
-    if df[col_portafolio].iloc[0] != monto_inicial:
+    if df[col_portafolio].iloc[0] != monto_inicial and df[col_portafolio].iloc[0] > 0:
         factor = monto_inicial / df[col_portafolio].iloc[0]
         df[col_portafolio] = df[col_portafolio] * factor
-        if col_benchmark in df.columns and mostrar_benchmark:
+        if col_benchmark and col_benchmark in df.columns and mostrar_benchmark:
             df[col_benchmark] = df[col_benchmark] * factor
     
     # Crear gráfico según tipo seleccionado
@@ -125,15 +141,15 @@ def _render_equity_curve(
             f'Portafolio {perfil.title()}': df[col_portafolio]
         }
         
-        if mostrar_benchmark and col_benchmark in df.columns:
+        if mostrar_benchmark and col_benchmark and col_benchmark in df.columns:
             series_dict['SPY (Benchmark)'] = df[col_benchmark]
         
         colors = [ColorPalette.get_profile_color(perfil)]
         if mostrar_benchmark:
             colors.append('#666666')
         
-        fig = ChartFactory.create_equity_curve(
-            df_equity=pd.DataFrame(series_dict, index=df.index),
+        fig = ChartFactory.create_line_chart(
+            df=pd.DataFrame(series_dict, index=df.index),
             title="Evolución del Portafolio",
             colors=colors
         )
@@ -152,8 +168,8 @@ def _render_equity_curve(
             st.info("📊 Datos OHLC no disponibles. Mostrando gráfico de línea.")
             # Fallback a línea
             series_dict = {f'Portafolio {perfil.title()}': df[col_portafolio]}
-            fig = ChartFactory.create_equity_curve(
-                df_equity=pd.DataFrame(series_dict, index=df.index),
+            fig = ChartFactory.create_line_chart(
+                df=pd.DataFrame(series_dict, index=df.index),
                 title="Evolución del Portafolio"
             )
             st.plotly_chart(fig, use_container_width=True)
@@ -162,23 +178,48 @@ def _render_equity_curve(
 def _render_drawdown(df_equity: pd.DataFrame, perfil: str):
     """Renderiza el gráfico de drawdown."""
     st.subheader("📉 Drawdown")
-    
-    # Calcular drawdown
-    col_portafolio = 'portafolio' if 'portafolio' in df_equity.columns else 'equity'
-    
+
+    # Detectar columna del portafolio dinámicamente
+    col_portafolio = None
+    for col in df_equity.columns:
+        col_lower = col.lower()
+        if 'portafolio' in col_lower or col_lower == 'equity':
+            col_portafolio = col
+            break
+
+    if col_portafolio is None:
+        st.error(f"No se encontró columna de portafolio. Columnas disponibles: {df_equity.columns.tolist()}")
+        return
+
+    # Detectar columna de benchmark
+    col_benchmark = None
+    for col in df_equity.columns:
+        col_lower = col.lower()
+        if 'benchmark' in col_lower or 'spy' in col_lower:
+            col_benchmark = col
+            break
+
     # Calcular drawdown manualmente
     equity = df_equity[col_portafolio]
     rolling_max = equity.cummax()
-    drawdown = (equity - rolling_max) / rolling_max
-    
+    drawdown_portfolio = (equity - rolling_max) / rolling_max
+
+    # Preparar datos para el gráfico
     df_dd = pd.DataFrame({
-        'Drawdown': drawdown
-    }, index=df_equity.index)
-    
+        'fecha': df_equity.index,
+        'drawdown_portfolio': drawdown_portfolio * 100,  # Convertir a porcentaje
+    })
+
+    # Agregar benchmark si existe
+    if col_benchmark and col_benchmark in df_equity.columns:
+        equity_bench = df_equity[col_benchmark]
+        rolling_max_bench = equity_bench.cummax()
+        drawdown_benchmark = (equity_bench - rolling_max_bench) / rolling_max_bench
+        df_dd['drawdown_benchmark'] = drawdown_benchmark * 100
+
     fig = ChartFactory.create_drawdown_chart(
-        df_drawdown=df_dd,
-        title="",
-        color=ColorPalette.get_profile_color(perfil)
+        df=df_dd,
+        profile=perfil
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -231,24 +272,34 @@ def _render_retornos_periodo(df_equity: pd.DataFrame, perfil: str):
 def _extraer_metricas_de_summary(df_summary: pd.DataFrame, perfil: str) -> dict:
     """Extrae métricas del DataFrame de resumen."""
     try:
-        # Buscar la fila del perfil
-        df_perfil = df_summary[df_summary['perfil'].str.lower() == perfil.lower()]
+        # Buscar la fila del perfil (puede ser 'perfil' o 'Perfil')
+        perfil_col = 'Perfil' if 'Perfil' in df_summary.columns else 'perfil'
+        df_perfil = df_summary[df_summary[perfil_col].str.lower() == perfil.lower()]
         
         if df_perfil.empty:
             return {}
         
         row = df_perfil.iloc[0]
         
-        # Mapear columnas según estructura de backtest_summary.csv
+        # Función helper para obtener valores con múltiples nombres posibles
+        def get_val(cols_list, default=0):
+            for c in cols_list:
+                if c in row.index:
+                    return row[c]
+            return default
+        
+        # Mapear columnas según estructura de reporte_final_metricas.csv
         metricas = {
-            'retorno_total': row.get('retorno_total', row.get('total_return', 0)),
-            'cagr': row.get('cagr', row.get('annual_return', 0)),
-            'volatilidad': row.get('volatilidad', row.get('volatility', 0)),
-            'sharpe': row.get('sharpe', row.get('sharpe_ratio', 0)),
-            'max_drawdown': row.get('max_drawdown', 0),
-            'sortino': row.get('sortino', row.get('sortino_ratio', 0)),
-            'calmar': row.get('calmar', row.get('calmar_ratio', 0)),
-            'win_rate': row.get('win_rate', 0),
+            'retorno_total': get_val(['Retorno Portafolio', 'retorno_total', 'total_return']),
+            'retorno_spy': get_val(['Retorno SPY', 'retorno_spy', 'benchmark_return']),
+            'alpha': get_val(['Alpha', 'alpha']),
+            'cagr': get_val(['CAGR', 'cagr', 'annual_return']),
+            'volatilidad': get_val(['Volatilidad', 'volatilidad', 'volatility']),
+            'sharpe': get_val(['Sharpe Ratio', 'sharpe', 'sharpe_ratio']),
+            'max_drawdown': get_val(['Max Drawdown', 'max_drawdown']),
+            'sortino': get_val(['Sortino', 'sortino', 'sortino_ratio']),
+            'calmar': get_val(['Calmar', 'calmar', 'calmar_ratio']),
+            'win_rate': get_val(['Win Rate', 'win_rate']),
         }
         
         return metricas

@@ -1,0 +1,22 @@
+# Streamlit Cloud Configuration
+# https://docs.streamlit.io/library/advanced-features/configuration
+
+[server]
+headless = true
+port = 8501
+# enableCORS y enableXsrfProtection manejados automáticamente por Streamlit Cloud
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+# Professional blue theme for financial app
+primaryColor = "#1976D2"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F7FA"
+textColor = "#212121"
+font = "sans serif"
+
+[client]
+showErrorDetails = false
+toolbarMode = "minimal"

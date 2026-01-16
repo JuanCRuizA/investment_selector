@@ -1,0 +1,26 @@
+# Metadata de Segmentación
+# Generado: 2026-01-12 13:04:59
+# ================================================
+
+Total activos procesados: 467
+Outliers detectados: 34 (7.3%)
+Eps DBSCAN utilizado: 1.411
+Número de clusters K-Means: 4
+
+## Evaluación del Clustering
+Silhouette Score: 0.3216
+Davies-Bouldin Score: 0.8550
+
+## Varianza explicada por PCA
+PC1: 39.06%
+PC2: 28.86%
+Total (2 componentes): 67.92%
+
+## Distribución de Clusters
+{
+  "-1": 34,
+  "0": 151,
+  "1": 161,
+  "2": 116,
+  "3": 5
+}

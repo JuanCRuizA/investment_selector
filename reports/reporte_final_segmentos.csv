@@ -1,0 +1,6 @@
+segmento,segmento_nombre,Activos,Ret. Medio,Ret. Std,Volatilidad,Sharpe,Beta,Max DD
+-1,Outliers_Riesgo_Extremo,29,-0.0884,0.3578,0.5779,-0.0724,0.918,-0.6268
+0,Conservador,50,-0.0824,0.0496,0.228,-0.5521,0.5613,-0.4319
+1,Alto_Rendimiento,96,0.2311,0.0864,0.3071,0.6596,0.9801,-0.3333
+2,Moderado,94,0.0043,0.0887,0.3884,0.0575,1.3021,-0.5682
+3,Estable,199,0.0612,0.0442,0.2366,0.1528,0.7599,-0.3264
