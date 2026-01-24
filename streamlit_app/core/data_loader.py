@@ -94,7 +94,13 @@ class DataLoader:
     @st.cache_data(ttl=3600)
     def load_backtest_summary(_self) -> pd.DataFrame:
         """Load combined backtest metrics for all profiles."""
-        # Try loading from reporte_final_metricas.csv first
+        # Try loading from backtest_summary.csv first (has all metrics)
+        # Check in outputs/api/ directory
+        api_path = _self.data_path.parent / "outputs" / "api" / "backtest_summary.csv"
+        if api_path.exists():
+            return pd.read_csv(api_path)
+
+        # Fallback to reporte_final_metricas.csv
         path = _self.data_path / "reporte_final_metricas.csv"
         if path.exists():
             return pd.read_csv(path)

@@ -195,11 +195,24 @@ def _render_detalle_activo(
             precios = df_precios[ticker].dropna()
             rolling_max = precios.cummax()
             drawdown = (precios - rolling_max) / rolling_max
-            
-            fig = ChartFactory.create_drawdown_chart(
-                df_drawdown=pd.DataFrame({'Drawdown': drawdown}),
-                title="",
-                color='#E53935'
+
+            # Crear gráfico de drawdown manualmente
+            import plotly.graph_objects as go
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=precios.index,
+                y=drawdown * 100,
+                fill='tozeroy',
+                name='Drawdown',
+                line=dict(color='#E53935'),
+                fillcolor='rgba(229, 57, 53, 0.3)'
+            ))
+            fig.update_layout(
+                xaxis_title="Fecha",
+                yaxis_title="Drawdown (%)",
+                height=300,
+                margin=dict(l=20, r=20, t=20, b=20),
+                template='plotly_white'
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -217,9 +230,33 @@ def _render_retornos_mensuales_activo(df_precios: pd.DataFrame, ticker: str):
     
     with col1:
         st.markdown("**Retornos Mensuales (Heatmap)**")
-        fig = ChartFactory.create_monthly_returns_heatmap(
-            df_returns=ret_mensual.to_frame('retorno'),
-            title=""
+        # Crear heatmap de retornos mensuales
+        import plotly.graph_objects as go
+
+        df_heat = ret_mensual.to_frame('retorno')
+        df_heat['year'] = df_heat.index.year
+        df_heat['month'] = df_heat.index.month
+
+        pivot = df_heat.pivot(index='year', columns='month', values='retorno')
+        month_names = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+
+        fig = go.Figure(data=go.Heatmap(
+            z=pivot.values * 100,
+            x=[month_names[m-1] for m in pivot.columns],
+            y=pivot.index,
+            colorscale='RdYlGn',
+            zmid=0,
+            text=[[f'{v*100:.1f}%' if pd.notna(v) else '' for v in row] for row in pivot.values],
+            texttemplate='%{text}',
+            textfont={'size': 10},
+            hovertemplate='Año: %{y}<br>Mes: %{x}<br>Retorno: %{z:.1f}%<extra></extra>'
+        ))
+        fig.update_layout(
+            xaxis_title='Mes',
+            yaxis_title='Año',
+            height=300,
+            margin=dict(l=50, r=20, t=30, b=50)
         )
         st.plotly_chart(fig, use_container_width=True)
     
@@ -259,10 +296,23 @@ def _render_retornos_anuales_activo(df_precios: pd.DataFrame, ticker: str):
     })
     df_anual['Retorno Fmt'] = df_anual['Retorno'].apply(Formatters.format_percentage)
     
-    fig = ChartFactory.create_annual_returns_bar(
-        df_returns=ret_anual,
-        title="",
-        color='#1E88E5'
+    # Crear gráfico de barras de retornos anuales
+    import plotly.graph_objects as go
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=ret_anual.index.year,
+        y=ret_anual.values * 100,
+        marker_color='#1E88E5',
+        text=[f'{v*100:.1f}%' for v in ret_anual.values],
+        textposition='auto',
+        hovertemplate='%{x}: %{y:.1f}%<extra></extra>'
+    ))
+    fig.update_layout(
+        xaxis_title='Año',
+        yaxis_title='Retorno (%)',
+        height=300,
+        margin=dict(l=50, r=20, t=30, b=50)
     )
     st.plotly_chart(fig, use_container_width=True)
 

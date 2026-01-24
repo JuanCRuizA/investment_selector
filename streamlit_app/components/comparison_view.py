@@ -292,13 +292,7 @@ def _render_comparacion_riesgo(
         ColorPalette.get_profile_color(perfil2)
     ]
     
-    fig = ChartFactory.create_drawdown_chart(
-        df_drawdown=df_dd,
-        title="Drawdown Comparativo",
-        color=colors[0]  # Se ajustará para múltiples series
-    )
-    
-    # Actualizar para mostrar ambas series
+    # Crear gráfico de drawdown comparativo
     import plotly.graph_objects as go
     fig = go.Figure()
     
@@ -367,11 +361,35 @@ def _render_radar_comparativo(
         st.info("Datos insuficientes para el gráfico radar")
         return
     
-    fig = ChartFactory.create_radar_chart(
-        categories=list(m1.keys()),
-        values_list=[list(m1.values()), list(m2.values())],
-        names=[perfil1.title(), perfil2.title()],
-        title=""
+    # Crear gráfico radar comparativo
+    import plotly.graph_objects as go
+
+    categories = list(m1.keys())
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatterpolar(
+        r=list(m1.values()) + [list(m1.values())[0]],
+        theta=categories + [categories[0]],
+        fill='toself',
+        name=perfil1.title(),
+        line_color=ColorPalette.get_profile_color(perfil1)
+    ))
+
+    fig.add_trace(go.Scatterpolar(
+        r=list(m2.values()) + [list(m2.values())[0]],
+        theta=categories + [categories[0]],
+        fill='toself',
+        name=perfil2.title(),
+        line_color=ColorPalette.get_profile_color(perfil2),
+        opacity=0.7
+    ))
+
+    max_val = max(max(m1.values()), max(m2.values()))
+    fig.update_layout(
+        polar=dict(radialaxis=dict(visible=True, range=[0, max_val * 1.1])),
+        showlegend=True,
+        height=400,
+        margin=dict(l=50, r=50, t=50, b=50)
     )
     st.plotly_chart(fig, use_container_width=True)
 

@@ -86,11 +86,11 @@ def _render_metricas_backtest(metricas: dict, perfil: str):
         )
     
     with col8:
-        win_rate = metricas.get('win_rate', 0)
+        alpha = metricas.get('alpha', 0)
         st.metric(
-            label="Win Rate",
-            value=Formatters.format_percentage(win_rate),
-            help="Porcentaje de meses positivos"
+            label="Alpha",
+            value=Formatters.format_percentage(alpha),
+            help="Exceso de retorno vs benchmark"
         )
 
 
@@ -226,10 +226,20 @@ def _render_drawdown(df_equity: pd.DataFrame, perfil: str):
 
 def _render_retornos_periodo(df_equity: pd.DataFrame, perfil: str):
     """Renderiza análisis de retornos por período."""
+    # Detectar columna del portafolio dinámicamente
+    col_portafolio = None
+    for col in df_equity.columns:
+        col_lower = col.lower()
+        if 'portafolio' in col_lower or col_lower == 'equity':
+            col_portafolio = col
+            break
+
+    if col_portafolio is None:
+        st.warning("No se encontró columna de portafolio para análisis de retornos")
+        return
+
     col1, col2 = st.columns(2)
-    
-    col_portafolio = 'portafolio' if 'portafolio' in df_equity.columns else 'equity'
-    
+
     with col1:
         st.subheader("📅 Retornos Mensuales")
         
@@ -240,10 +250,34 @@ def _render_retornos_periodo(df_equity: pd.DataFrame, perfil: str):
         ).dropna()
         
         if len(df_monthly) > 0:
-            # Crear heatmap si hay suficientes datos
-            fig = ChartFactory.create_monthly_returns_heatmap(
-                df_returns=df_monthly.to_frame('retorno'),
-                title=""
+            # Crear heatmap de retornos mensuales
+            import plotly.graph_objects as go
+
+            # Preparar datos para heatmap
+            df_heat = df_monthly.to_frame('retorno')
+            df_heat['year'] = df_heat.index.year
+            df_heat['month'] = df_heat.index.month
+
+            pivot = df_heat.pivot(index='year', columns='month', values='retorno')
+            month_names = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                          'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+
+            fig = go.Figure(data=go.Heatmap(
+                z=pivot.values * 100,
+                x=[month_names[m-1] for m in pivot.columns],
+                y=pivot.index,
+                colorscale='RdYlGn',
+                zmid=0,
+                text=[[f'{v*100:.1f}%' if pd.notna(v) else '' for v in row] for row in pivot.values],
+                texttemplate='%{text}',
+                textfont={'size': 10},
+                hovertemplate='Año: %{y}<br>Mes: %{x}<br>Retorno: %{z:.1f}%<extra></extra>'
+            ))
+            fig.update_layout(
+                xaxis_title='Mes',
+                yaxis_title='Año',
+                height=300,
+                margin=dict(l=50, r=20, t=30, b=50)
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
@@ -259,10 +293,23 @@ def _render_retornos_periodo(df_equity: pd.DataFrame, perfil: str):
         ).dropna()
         
         if len(df_yearly) > 0:
-            fig = ChartFactory.create_annual_returns_bar(
-                df_returns=df_yearly,
-                title="",
-                color=ColorPalette.get_profile_color(perfil)
+            # Crear gráfico de barras de retornos anuales
+            import plotly.graph_objects as go
+
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                x=df_yearly.index.year,
+                y=df_yearly.values * 100,
+                marker_color=ColorPalette.get_profile_color(perfil),
+                text=[f'{v*100:.1f}%' for v in df_yearly.values],
+                textposition='auto',
+                hovertemplate='%{x}: %{y:.1f}%<extra></extra>'
+            ))
+            fig.update_layout(
+                xaxis_title='Año',
+                yaxis_title='Retorno (%)',
+                height=300,
+                margin=dict(l=50, r=20, t=30, b=50)
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
@@ -288,18 +335,17 @@ def _extraer_metricas_de_summary(df_summary: pd.DataFrame, perfil: str) -> dict:
                     return row[c]
             return default
         
-        # Mapear columnas según estructura de reporte_final_metricas.csv
+        # Mapear columnas según estructura de backtest_summary.csv
         metricas = {
-            'retorno_total': get_val(['Retorno Portafolio', 'retorno_total', 'total_return']),
-            'retorno_spy': get_val(['Retorno SPY', 'retorno_spy', 'benchmark_return']),
+            'retorno_total': get_val(['Retorno_Total_portafolio', 'Retorno Portafolio', 'retorno_total', 'total_return']),
+            'retorno_spy': get_val(['Retorno_Total_benchmark', 'Retorno SPY', 'retorno_spy', 'benchmark_return']),
             'alpha': get_val(['Alpha', 'alpha']),
-            'cagr': get_val(['CAGR', 'cagr', 'annual_return']),
-            'volatilidad': get_val(['Volatilidad', 'volatilidad', 'volatility']),
-            'sharpe': get_val(['Sharpe Ratio', 'sharpe', 'sharpe_ratio']),
-            'max_drawdown': get_val(['Max Drawdown', 'max_drawdown']),
-            'sortino': get_val(['Sortino', 'sortino', 'sortino_ratio']),
-            'calmar': get_val(['Calmar', 'calmar', 'calmar_ratio']),
-            'win_rate': get_val(['Win Rate', 'win_rate']),
+            'cagr': get_val(['Retorno_Anualizado_portafolio', 'CAGR', 'cagr', 'annual_return']),
+            'volatilidad': get_val(['Volatilidad_Anualizada_portafolio', 'Volatilidad', 'volatilidad', 'volatility']),
+            'sharpe': get_val(['Sharpe_Ratio_portafolio', 'Sharpe Ratio', 'sharpe', 'sharpe_ratio']),
+            'max_drawdown': get_val(['Max_Drawdown_portafolio', 'Max Drawdown', 'max_drawdown']),
+            'sortino': get_val(['Sortino_Ratio_portafolio', 'Sortino', 'sortino', 'sortino_ratio']),
+            'calmar': get_val(['Calmar_Ratio_portafolio', 'Calmar', 'calmar', 'calmar_ratio']),
         }
         
         return metricas
