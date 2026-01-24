@@ -94,17 +94,16 @@ class DataLoader:
     @st.cache_data(ttl=3600)
     def load_backtest_summary(_self) -> pd.DataFrame:
         """Load combined backtest metrics for all profiles."""
-        # Try loading from backtest_summary.csv first (has all metrics)
-        # Check in outputs/api/ directory
-        api_path = _self.data_path.parent / "outputs" / "api" / "backtest_summary.csv"
-        if api_path.exists():
-            return pd.read_csv(api_path)
+        # Try loading from reports/backtest_summary.csv first (has all metrics)
+        path = _self.data_path / "backtest_summary.csv"
+        if path.exists():
+            return pd.read_csv(path)
 
         # Fallback to reporte_final_metricas.csv
         path = _self.data_path / "reporte_final_metricas.csv"
         if path.exists():
             return pd.read_csv(path)
-        
+
         # Fallback: combine individual files
         all_metrics = []
         for perfil in _self.PERFILES:
@@ -112,7 +111,7 @@ class DataLoader:
             if not df.empty:
                 df['perfil'] = perfil
                 all_metrics.append(df)
-        
+
         if not all_metrics:
             return pd.DataFrame()
         return pd.concat(all_metrics, ignore_index=True)
