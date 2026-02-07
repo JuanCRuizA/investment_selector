@@ -96,7 +96,7 @@ def _calcular_metricas_activo(
 
 def _render_tabla_metricas_activos(df_metricas: pd.DataFrame):
     """Renderiza la tabla de métricas por activo."""
-    st.subheader("📊 Métricas por Activo")
+    st.subheader("Metricas por Activo")
     
     # Formatear para display
     df_display = pd.DataFrame({
@@ -145,7 +145,7 @@ def _render_detalle_activo(
     metricas: dict
 ):
     """Renderiza el detalle de un activo individual."""
-    st.subheader(f"📈 Detalle: {ticker}")
+    st.subheader(f"Detalle: {ticker}")
     
     # Métricas en cards
     col1, col2, col3, col4 = st.columns(4)
@@ -333,7 +333,7 @@ def render_metrics_view(
     Returns:
         DataFrame con métricas o None si hay error
     """
-    st.header(f"📊 Métricas Detalladas - {perfil.title()}")
+    st.header(f"Metricas Detalladas - {perfil.title()}")
     
     try:
         # Cargar precios
@@ -376,10 +376,10 @@ def render_metrics_view(
             _render_detalle_activo(df_precios, ticker_seleccionado, metricas_activo)
             
             # Retornos en expanders
-            with st.expander("📅 Análisis de Retornos Mensuales", expanded=False):
+            with st.expander("Analisis de Retornos Mensuales", expanded=False):
                 _render_retornos_mensuales_activo(df_precios, ticker_seleccionado)
             
-            with st.expander("📊 Análisis de Retornos Anuales", expanded=False):
+            with st.expander("Analisis de Retornos Anuales", expanded=False):
                 _render_retornos_anuales_activo(df_precios, ticker_seleccionado)
         
         return df_metricas
@@ -398,7 +398,7 @@ def render_metrics_summary(df_metricas: pd.DataFrame, perfil: str):
         df_metricas: DataFrame con métricas por activo
         perfil: Nombre del perfil
     """
-    st.subheader("📊 Resumen de Métricas del Portafolio")
+    st.subheader("Resumen de Metricas del Portafolio")
     
     col1, col2, col3 = st.columns(3)
     

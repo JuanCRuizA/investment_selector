@@ -15,27 +15,27 @@ from typing import Optional, Literal
 # Configuración de perfiles disponibles
 PERFILES_DISPONIBLES = {
     'conservador': {
-        'nombre': '🛡️ Conservador',
-        'descripcion': 'Mínimo riesgo, retornos estables',
+        'nombre': 'Conservador',
+        'descripcion': 'Minimo riesgo, retornos estables',
         'color': '#2E7D32'
     },
     'moderado': {
-        'nombre': '⚖️ Moderado', 
+        'nombre': 'Moderado',
         'descripcion': 'Balance entre riesgo y retorno',
         'color': '#1976D2'
     },
     'normal': {
-        'nombre': '📊 Normal',
-        'descripcion': 'Diversificación equilibrada',
+        'nombre': 'Normal',
+        'descripcion': 'Diversificacion equilibrada',
         'color': '#7B1FA2'
     },
     'agresivo': {
-        'nombre': '🚀 Agresivo',
+        'nombre': 'Agresivo',
         'descripcion': 'Mayor riesgo, mayor potencial',
         'color': '#F57C00'
     },
     'especulativo': {
-        'nombre': '⚡ Especulativo',
+        'nombre': 'Especulativo',
         'descripcion': 'Alto riesgo, alta volatilidad',
         'color': '#D32F2F'
     }
@@ -77,7 +77,7 @@ class SidebarConfig:
 
 def _render_perfil_selector() -> str:
     """Renderiza el selector de perfil de riesgo."""
-    st.subheader("📈 Perfil de Riesgo")
+    st.subheader("Perfil de Riesgo")
     
     # Crear opciones para el selectbox
     opciones = list(PERFILES_DISPONIBLES.keys())
@@ -103,7 +103,7 @@ def _render_perfil_selector() -> str:
 
 def _render_monto_input() -> float:
     """Renderiza el input de monto de inversión."""
-    st.subheader("💰 Monto de Inversión")
+    st.subheader("Monto de Inversion")
     
     # Input numérico con formato
     monto = st.number_input(
@@ -125,7 +125,7 @@ def _render_monto_input() -> float:
 
 def _render_horizonte_selector() -> tuple[str, int]:
     """Renderiza el selector de horizonte temporal."""
-    st.subheader("⏱️ Horizonte de Inversión")
+    st.subheader("Horizonte de Inversion")
     
     opciones = list(HORIZONTES_DISPONIBLES.keys())
     nombres = [HORIZONTES_DISPONIBLES[h]['nombre'] for h in opciones]
@@ -147,7 +147,7 @@ def _render_horizonte_selector() -> tuple[str, int]:
 
 def _render_opciones_visualizacion() -> tuple[bool, str]:
     """Renderiza las opciones de visualización."""
-    st.subheader("📊 Visualización")
+    st.subheader("Visualizacion")
     
     mostrar_benchmark = st.checkbox(
         "Comparar con SPY (S&P 500)",
@@ -160,9 +160,9 @@ def _render_opciones_visualizacion() -> tuple[bool, str]:
         "Tipo de gráfico",
         options=['linea', 'velas', 'ambos'],
         format_func=lambda x: {
-            'linea': '📈 Línea',
-            'velas': '🕯️ Velas',
-            'ambos': '📊 Ambos'
+            'linea': 'Linea',
+            'velas': 'Velas',
+            'ambos': 'Ambos'
         }[x],
         index=0,
         key='tipo_grafico',
@@ -175,7 +175,7 @@ def _render_opciones_visualizacion() -> tuple[bool, str]:
 
 def _render_modo_comparacion(perfil_actual: str) -> tuple[bool, Optional[str]]:
     """Renderiza el modo de comparación entre perfiles."""
-    st.subheader("🔄 Comparación")
+    st.subheader("Comparacion")
     
     modo_comparacion = st.checkbox(
         "Comparar con otro perfil",
@@ -213,18 +213,18 @@ def _render_info_footer():
     """Renderiza información adicional en el footer del sidebar."""
     st.divider()
     
-    with st.expander("ℹ️ Información", expanded=False):
+    with st.expander("Informacion", expanded=False):
         st.markdown("""
-        **Metodología:**
-        - Clustering por características de riesgo
-        - Optimización de portafolios por perfil
-        - Backtesting con datos históricos
-        
+        **Metodologia:**
+        - Clustering por caracteristicas de riesgo
+        - Optimizacion de portafolios por perfil
+        - Backtesting con datos historicos
+
         **Datos:**
-        - Período: 2018-2024
+        - Periodo: 2018-2024
         - Activos: ETFs y acciones US
         - Benchmark: SPY (S&P 500)
-        
+
         **Disclaimer:**
         Resultados pasados no garantizan rendimientos futuros.
         """)
@@ -239,8 +239,8 @@ def render_sidebar() -> SidebarConfig:
     """
     with st.sidebar:
         # Logo/Título
-        st.title("🎯 Portfolio Selector")
-        st.caption("Sistema de Selección de Portafolios")
+        st.title("Portfolio Selector")
+        st.caption("Sistema de Seleccion de Portafolios")
         
         st.divider()
         

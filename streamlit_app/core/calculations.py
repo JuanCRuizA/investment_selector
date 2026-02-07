@@ -253,7 +253,7 @@ class PortfolioCalculations:
             },
             'comparison': {
                 'Excess Return': f"{row['Excess_Return']:.2%}",
-                'Winner': '🏆 Portafolio' if row['Excess_Return'] > 0 else '📊 Benchmark',
+                'Winner': 'Portafolio' if row['Excess_Return'] > 0 else 'Benchmark',
             }
         }
     

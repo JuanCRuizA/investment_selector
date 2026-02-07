@@ -16,7 +16,7 @@ import sys
 # Configuración de página (DEBE ser lo primero)
 st.set_page_config(
     page_title="Portfolio Selector",
-    page_icon="🎯",
+    page_icon="chart_with_upwards_trend",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -115,14 +115,14 @@ def render_header():
     col1, col2 = st.columns([3, 1])
     
     with col1:
-        st.title("🎯 Portfolio Selector")
-        st.caption("Sistema de Selección de Portafolios por Perfil de Riesgo")
+        st.title("Portfolio Selector")
+        st.caption("Sistema de Seleccion de Portafolios por Perfil de Riesgo")
     
     with col2:
         st.markdown("""
         <div style='text-align: right; padding-top: 20px;'>
             <a href='https://github.com/fantastic1121/stocks_portfolio_selector' target='_blank'>
-                📚 Documentación
+                Documentacion
             </a>
         </div>
         """, unsafe_allow_html=True)
@@ -144,18 +144,18 @@ def render_tabs(
     # Determinar pestañas según modo
     if config.modo_comparacion and config.perfil_comparacion:
         tabs = st.tabs([
-            "📊 Portafolio",
-            "🔬 Backtesting", 
-            "📈 Métricas",
-            "🔄 Comparación",
-            "📥 Exportar"
+            "Portafolio",
+            "Backtesting",
+            "Metricas",
+            "Comparacion",
+            "Exportar"
         ])
     else:
         tabs = st.tabs([
-            "📊 Portafolio",
-            "🔬 Backtesting",
-            "📈 Métricas",
-            "📥 Exportar"
+            "Portafolio",
+            "Backtesting",
+            "Metricas",
+            "Exportar"
         ])
     
     # Tab 1: Portafolio
@@ -239,7 +239,7 @@ def render_tabs(
 
 def render_export_section(config: SidebarConfig):
     """Renderiza la sección de exportación."""
-    st.header("📥 Exportar Datos")
+    st.header("Exportar Datos")
     
     if st.session_state.df_portafolio is not None:
         render_export_buttons(
@@ -254,23 +254,23 @@ def render_export_section(config: SidebarConfig):
         st.divider()
         
         # Información adicional
-        with st.expander("ℹ️ Información sobre los formatos"):
+        with st.expander("Informacion sobre los formatos"):
             st.markdown("""
             ### Formatos disponibles:
-            
-            **📄 CSV**
+
+            **CSV**
             - Formato simple y universal
             - Compatible con Excel, Google Sheets, etc.
             - Contiene: Ticker, Segmento, Peso, Monto
-            
-            **📊 Excel**
-            - Múltiples hojas con información detallada
-            - Incluye: Resumen, Composición, Métricas, Equity Curve
+
+            **Excel**
+            - Multiples hojas con informacion detallada
+            - Incluye: Resumen, Composicion, Metricas, Equity Curve
             - Formato profesional para reportes
-            
-            **📑 PDF**
-            - Reporte formateado para presentación
-            - Incluye métricas y composición
+
+            **PDF**
+            - Reporte formateado para presentacion
+            - Incluye metricas y composicion
             - Ideal para compartir con clientes
             """)
     else:
@@ -279,7 +279,7 @@ def render_export_section(config: SidebarConfig):
 
 def render_error_state(error: Exception):
     """Renderiza estado de error."""
-    st.error("❌ Error al cargar la aplicación")
+    st.error("Error al cargar la aplicacion")
     
     with st.expander("Detalles del error"):
         st.exception(error)
@@ -305,15 +305,15 @@ def render_error_state(error: Exception):
 def render_welcome_message():
     """Renderiza mensaje de bienvenida."""
     st.info("""
-    👋 **¡Bienvenido al Portfolio Selector!**
-    
-    Usa el panel lateral para:
-    1. Seleccionar tu **perfil de riesgo**
+    **Bienvenido a Portfolio Selector**
+
+    Utilice el panel lateral para:
+    1. Seleccionar su **perfil de riesgo**
     2. Ingresar el **monto a invertir**
-    3. Definir tu **horizonte temporal**
-    
-    El sistema te mostrará un portafolio optimizado con 10 activos seleccionados
-    mediante clustering y optimización basada en tu perfil de inversor.
+    3. Definir su **horizonte temporal**
+
+    El sistema generara un portafolio optimizado con 10 activos seleccionados
+    mediante analisis cuantitativo y optimizacion basada en su perfil de inversor.
     """)
 
 
@@ -345,14 +345,14 @@ def main():
         if df_test is None or df_test.empty:
             render_welcome_message()
             st.warning("""
-            ⚠️ **No se encontraron datos del pipeline.**
-            
-            Asegúrate de haber ejecutado el pipeline de producción:
+            **No se encontraron datos del pipeline.**
+
+            Asegurese de haber ejecutado el pipeline de produccion:
             ```bash
             python run_pipeline.py
             ```
-            
-            Esto generará los archivos necesarios en `outputs/api/`.
+
+            Esto generara los archivos necesarios en `outputs/api/`.
             """)
             return
         
@@ -362,7 +362,7 @@ def main():
         # Footer
         st.divider()
         st.caption("""
-        🎯 Portfolio Selector v1.0 | Risk Management 2025 | 
+        Portfolio Selector v1.0 | Risk Management 2025 |
         Los rendimientos pasados no garantizan rendimientos futuros.
         """)
         

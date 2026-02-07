@@ -21,7 +21,7 @@ from utils.charts import ChartFactory
 
 def _render_metricas_backtest(metricas: dict, perfil: str):
     """Renderiza las métricas principales del backtest."""
-    st.subheader("📈 Métricas de Rendimiento")
+    st.subheader("Metricas de Rendimiento")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -102,7 +102,7 @@ def _render_equity_curve(
     monto_inicial: float
 ):
     """Renderiza la curva de equity."""
-    st.subheader("📊 Curva de Equity")
+    st.subheader("Curva de Equity")
     
     # Preparar datos
     df = df_equity.copy()
@@ -165,7 +165,7 @@ def _render_equity_curve(
             )
             st.plotly_chart(fig_candle, use_container_width=True)
         elif tipo_grafico == 'velas':
-            st.info("📊 Datos OHLC no disponibles. Mostrando gráfico de línea.")
+            st.info("Datos OHLC no disponibles. Mostrando grafico de linea.")
             # Fallback a línea
             series_dict = {f'Portafolio {perfil.title()}': df[col_portafolio]}
             fig = ChartFactory.create_line_chart(
@@ -177,7 +177,7 @@ def _render_equity_curve(
 
 def _render_drawdown(df_equity: pd.DataFrame, perfil: str):
     """Renderiza el gráfico de drawdown."""
-    st.subheader("📉 Drawdown")
+    st.subheader("Drawdown")
 
     # Detectar columna del portafolio dinámicamente
     col_portafolio = None
@@ -241,7 +241,7 @@ def _render_retornos_periodo(df_equity: pd.DataFrame, perfil: str):
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("📅 Retornos Mensuales")
+        st.subheader("Retornos Mensuales")
         
         # Calcular retornos mensuales
         retornos = df_equity[col_portafolio].pct_change()
@@ -284,7 +284,7 @@ def _render_retornos_periodo(df_equity: pd.DataFrame, perfil: str):
             st.info("No hay suficientes datos para el heatmap mensual")
     
     with col2:
-        st.subheader("📊 Retornos Anuales")
+        st.subheader("Retornos Anuales")
         
         # Calcular retornos anuales
         retornos = df_equity[col_portafolio].pct_change()
@@ -375,7 +375,7 @@ def render_backtest_view(
     Returns:
         DataFrame con equity curve o None si hay error
     """
-    st.header(f"🔬 Backtesting - {perfil.title()}")
+    st.header(f"Backtesting - {perfil.title()}")
     
     try:
         # Cargar datos de backtest
@@ -415,7 +415,7 @@ def render_backtest_view(
             st.divider()
             
             # Retornos por período
-            with st.expander("📈 Análisis de Retornos por Período", expanded=False):
+            with st.expander("Analisis de Retornos por Periodo", expanded=False):
                 _render_retornos_periodo(df_equity, perfil)
             
             return df_equity
@@ -444,7 +444,7 @@ def render_backtest_comparison(
         monto_inversion: Monto inicial
         data_loader: Instancia de DataLoader
     """
-    st.subheader("📊 Comparación de Rendimiento")
+    st.subheader("Comparacion de Rendimiento")
     
     try:
         # Cargar equity curves de ambos perfiles
@@ -489,7 +489,7 @@ def render_backtest_comparison(
             metricas2 = _extraer_metricas_de_summary(df_summary, perfil2)
             
             if metricas1 and metricas2:
-                st.subheader("📋 Comparación de Métricas")
+                st.subheader("Comparacion de Metricas")
                 
                 df_comp = pd.DataFrame({
                     'Métrica': ['Retorno Total', 'CAGR', 'Volatilidad', 'Sharpe', 'Max Drawdown'],

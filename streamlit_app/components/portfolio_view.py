@@ -90,7 +90,7 @@ def _render_metricas_resumen(df_portafolio: pd.DataFrame, monto_inversion: float
 
 def _render_tabla_activos(df_display: pd.DataFrame):
     """Renderiza la tabla de activos."""
-    st.subheader("📋 Composición del Portafolio")
+    st.subheader("Composicion del Portafolio")
     
     # Configurar columnas para mejor visualización
     st.dataframe(
@@ -122,7 +122,7 @@ def _render_graficos_distribucion(df_portafolio: pd.DataFrame, perfil: str):
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("🥧 Distribución por Activo")
+        st.subheader("Distribucion por Activo")
         
         # Preparar datos para el pie chart
         df_pie = df_portafolio.copy()
@@ -137,7 +137,7 @@ def _render_graficos_distribucion(df_portafolio: pd.DataFrame, perfil: str):
         st.plotly_chart(fig_activos, use_container_width=True, key='pie_activos')
     
     with col2:
-        st.subheader("📊 Distribución por Segmento")
+        st.subheader("Distribucion por Segmento")
         
         # Agrupar por segmento
         df_segmento = df_portafolio.groupby('segmento')['peso'].sum().reset_index()
@@ -159,7 +159,7 @@ def _render_graficos_distribucion(df_portafolio: pd.DataFrame, perfil: str):
 
 def _render_detalle_segmentos(df_portafolio: pd.DataFrame):
     """Renderiza el detalle por segmentos en un expander."""
-    with st.expander("📑 Detalle por Segmento", expanded=False):
+    with st.expander("Detalle por Segmento", expanded=False):
         # Agrupar por segmento
         for segmento in sorted(df_portafolio['segmento'].unique()):
             df_seg = df_portafolio[df_portafolio['segmento'] == segmento]
@@ -194,7 +194,7 @@ def render_portfolio_view(
     Returns:
         DataFrame con el portafolio seleccionado o None si hay error
     """
-    st.header(f"💼 Portafolio {perfil.title()}")
+    st.header(f"Portafolio {perfil.title()}")
     
     try:
         # Obtener portafolio
@@ -249,14 +249,14 @@ def render_portfolio_comparison(
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader(f"📊 {perfil1.title()}")
+        st.subheader(f"{perfil1.title()}")
         df1 = portfolio_selector.seleccionar_portafolio(perfil1)
         if df1 is not None:
             df_display1, _ = _crear_tabla_portafolio(df1, monto_inversion)
             st.dataframe(df_display1, use_container_width=True, hide_index=True)
     
     with col2:
-        st.subheader(f"📊 {perfil2.title()}")
+        st.subheader(f"{perfil2.title()}")
         df2 = portfolio_selector.seleccionar_portafolio(perfil2)
         if df2 is not None:
             df_display2, _ = _crear_tabla_portafolio(df2, monto_inversion)

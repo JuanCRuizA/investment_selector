@@ -322,7 +322,7 @@ def render_export_buttons(
         df_metricas_activos: DataFrame con métricas por activo
         df_equity: DataFrame con equity curve
     """
-    st.subheader("📥 Exportar Datos")
+    st.subheader("Exportar Datos")
     
     col1, col2, col3 = st.columns(3)
     
@@ -332,7 +332,7 @@ def render_export_buttons(
         # Botón CSV
         csv_data = ExportManager.generate_csv_portfolio(df_portafolio, monto_inversion)
         st.download_button(
-            label="📄 Descargar CSV",
+            label="Descargar CSV",
             data=csv_data,
             file_name=f"portafolio_{perfil}_{fecha}.csv",
             mime="text/csv",
@@ -348,14 +348,14 @@ def render_export_buttons(
             )
             if excel_data:
                 st.download_button(
-                    label="📊 Descargar Excel",
+                    label="Descargar Excel",
                     data=excel_data,
                     file_name=f"reporte_{perfil}_{fecha}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     help="Descarga el reporte completo en formato Excel"
                 )
         else:
-            st.button("📊 Excel (no disponible)", disabled=True)
+            st.button("Excel (no disponible)", disabled=True)
             st.caption("Instalar: pip install openpyxl")
     
     with col3:
@@ -367,14 +367,14 @@ def render_export_buttons(
             )
             if pdf_data:
                 st.download_button(
-                    label="📑 Descargar PDF",
+                    label="Descargar PDF",
                     data=pdf_data,
                     file_name=f"reporte_{perfil}_{fecha}.pdf",
                     mime="application/pdf",
                     help="Descarga el reporte en formato PDF"
                 )
         else:
-            st.button("📑 PDF (no disponible)", disabled=True)
+            st.button("PDF (no disponible)", disabled=True)
             st.caption("Instalar: pip install fpdf2")
 
 
@@ -391,7 +391,7 @@ def render_quick_export(df_portafolio: pd.DataFrame, monto_inversion: float, per
     fecha = datetime.now().strftime('%Y%m%d')
     
     st.download_button(
-        label="📥 Exportar",
+        label="Exportar",
         data=csv_data,
         file_name=f"portafolio_{perfil}_{fecha}.csv",
         mime="text/csv",

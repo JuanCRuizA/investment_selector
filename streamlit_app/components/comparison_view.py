@@ -32,7 +32,7 @@ def _render_header_comparacion(perfil1: str, perfil2: str):
         st.caption(info1.get('descripcion', ''))
     
     with col2:
-        st.markdown("### ⚔️")
+        st.markdown("### VS")
         st.caption("vs")
     
     with col3:
@@ -48,7 +48,7 @@ def _render_comparacion_composicion(
     monto_inversion: float
 ):
     """Renderiza comparación de composición de portafolios."""
-    st.subheader("📋 Comparación de Composición")
+    st.subheader("Comparacion de Composicion")
     
     col1, col2 = st.columns(2)
     
@@ -110,7 +110,7 @@ def _render_comparacion_metricas(
     perfil2: str
 ):
     """Renderiza tabla comparativa de métricas."""
-    st.subheader("📊 Comparación de Métricas")
+    st.subheader("Comparacion de Metricas")
     
     def get_metricas(perfil):
         perfil_col = 'Perfil' if 'Perfil' in df_summary.columns else 'perfil'
@@ -173,8 +173,8 @@ def _render_comparacion_metricas(
             v2_fmt = Formatters.format_percentage(v2)
         
         # Agregar indicador
-        ind1 = "✅" if ganador == perfil1 else ""
-        ind2 = "✅" if ganador == perfil2 else ""
+        ind1 = "[+]" if ganador == perfil1 else ""
+        ind2 = "[+]" if ganador == perfil2 else ""
         
         data.append({
             'Métrica': nombre,
@@ -194,7 +194,7 @@ def _render_comparacion_equity(
     monto_inversion: float
 ):
     """Renderiza comparación de equity curves."""
-    st.subheader("📈 Comparación de Rendimiento")
+    st.subheader("Comparacion de Rendimiento")
     
     # Función para detectar columna de portafolio
     def get_portfolio_col(df):
@@ -259,7 +259,7 @@ def _render_comparacion_riesgo(
     perfil2: str
 ):
     """Renderiza comparación de métricas de riesgo."""
-    st.subheader("📉 Comparación de Riesgo (Drawdown)")
+    st.subheader("Comparacion de Riesgo (Drawdown)")
     
     # Función para detectar columna de portafolio
     def get_portfolio_col(df):
@@ -329,7 +329,7 @@ def _render_radar_comparativo(
     perfil2: str
 ):
     """Renderiza gráfico radar comparativo."""
-    st.subheader("🎯 Perfil de Riesgo-Retorno")
+    st.subheader("Perfil de Riesgo-Retorno")
     
     perfil_col = 'Perfil' if 'Perfil' in df_summary.columns else 'perfil'
     
@@ -411,7 +411,7 @@ def render_comparison_view(
         data_loader: Instancia de DataLoader
         portfolio_selector: Instancia de PortfolioSelector
     """
-    st.header("🔄 Comparación de Perfiles")
+    st.header("Comparacion de Perfiles")
     
     try:
         # Header
@@ -469,7 +469,7 @@ def render_all_profiles_comparison(
         monto_inversion: Monto a invertir
         data_loader: Instancia de DataLoader
     """
-    st.subheader("📊 Todos los Perfiles")
+    st.subheader("Todos los Perfiles")
     
     df_summary = data_loader.load_backtest_summary()
     

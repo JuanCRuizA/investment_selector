@@ -165,7 +165,7 @@ class ChartFactory:
         
         fig = cls._apply_layout(
             fig, 
-            f'📈 Evolución del Capital - Perfil {profile.capitalize()}',
+            f'Evolucion del Capital - Perfil {profile.capitalize()}',
             yaxis_title='Valor del Portafolio (USD)',
             xaxis_title='Fecha'
         )
@@ -215,7 +215,7 @@ class ChartFactory:
         
         fig = cls._apply_layout(
             fig,
-            f'📊 Retorno Acumulado (%) - Perfil {profile.capitalize()}',
+            f'Retorno Acumulado (%) - Perfil {profile.capitalize()}',
             yaxis_title='Retorno (%)',
             xaxis_title='Fecha'
         )
@@ -262,7 +262,7 @@ class ChartFactory:
         
         fig = cls._apply_layout(
             fig,
-            f'📉 Drawdown - Perfil {profile.capitalize()}',
+            f'Drawdown - Perfil {profile.capitalize()}',
             yaxis_title='Drawdown (%)',
             xaxis_title='Fecha'
         )
@@ -309,7 +309,7 @@ class ChartFactory:
         
         fig = cls._apply_layout(
             fig,
-            f'📅 Retornos Mensuales (%) - Perfil {profile.capitalize()}',
+            f'Retornos Mensuales (%) - Perfil {profile.capitalize()}',
             yaxis_title='Año',
             xaxis_title='Mes'
         )
@@ -354,7 +354,7 @@ class ChartFactory:
         
         fig = cls._apply_layout(
             fig,
-            f'📊 Retornos Anuales (%) - Perfil {profile.capitalize()}',
+            f'Retornos Anuales (%) - Perfil {profile.capitalize()}',
             yaxis_title='Retorno (%)',
             xaxis_title='Año',
             barmode='group'
@@ -383,13 +383,13 @@ class ChartFactory:
             labels = grouped['segmento_nombre']
             values = grouped['peso']
             colors = [ColorPalette.get_segment_color(seg) for seg in labels]
-            title = '🎯 Composición por Segmento'
+            title = 'Composicion por Segmento'
         else:
             labels = portfolio_df['ticker']
             values = portfolio_df['peso']
             colors = [ColorPalette.get_segment_color(seg) 
                      for seg in portfolio_df['segmento_nombre']]
-            title = '📊 Composición por Activo'
+            title = 'Composicion por Activo'
         
         fig = go.Figure(data=[go.Pie(
             labels=labels,
@@ -456,7 +456,7 @@ class ChartFactory:
         
         fig = cls._apply_layout(
             fig,
-            '📈 Relación Riesgo-Retorno',
+            'Relacion Riesgo-Retorno',
             xaxis_title='Volatilidad Anual',
             yaxis_title='Retorno Anualizado',
             xaxis_tickformat='.0%',
@@ -513,7 +513,7 @@ class ChartFactory:
         fig.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, max(max(portfolio_values), max(benchmark_values)) * 1.1])),
             showlegend=True,
-            title={'text': f'🎯 Comparación de Métricas - {profile.capitalize()}', 'x': 0.5}
+            title={'text': f'Comparacion de Metricas - {profile.capitalize()}', 'x': 0.5}
         )
         
         return fig
@@ -577,7 +577,7 @@ class ChartFactory:
             fig.add_trace(candlestick)
         
         fig.update_layout(
-            title={'text': f'🕯️ {ticker} - Gráfico de Velas', 'x': 0.5},
+            title={'text': f'{ticker} - Grafico de Velas', 'x': 0.5},
             xaxis_rangeslider_visible=False,
             template='plotly_white'
         )
@@ -630,7 +630,7 @@ class ChartFactory:
         
         fig = cls._apply_layout(
             fig,
-            f'📈 {ticker} - Rendimiento Normalizado (Base 100)',
+            f'{ticker} - Rendimiento Normalizado (Base 100)',
             yaxis_title='Valor Normalizado',
             xaxis_title='Fecha'
         )
@@ -679,7 +679,7 @@ class ChartFactory:
         
         fig = cls._apply_layout(
             fig,
-            '🏆 Comparación de Perfiles vs Benchmark',
+            'Comparacion de Perfiles vs Benchmark',
             yaxis_title='Retorno Total (%)',
             xaxis_title='Perfil de Inversión'
         )
